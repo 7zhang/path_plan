@@ -1,0 +1,9 @@
+*.out
+*.o
+*.png
+log*
+*.pos
+*.glp
+*.log
+*~
+mylog
