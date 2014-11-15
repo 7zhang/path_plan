@@ -2,7 +2,6 @@
 *.o
 *.png
 log*
-*.pos
 *.glp
 *.log
 *~
