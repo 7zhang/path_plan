@@ -1,6 +1,8 @@
 #ifndef __STATE_H__
 #define __STATE_H__
 
+#include <iostream>
+#include <iomanip>
 #include "Transform.h"
 #include "geom.h"
 #include "positioner.h"
@@ -57,7 +59,23 @@ typedef struct state {
 	JAngle ex_angle;
 
 	criteria c;
+	std::vector<double> m_cri;
 } state;
+
+static inline void print_state(state& s)
+{
+	std::cout << std::setw(10) << s.angle.get_angle(1) << " "
+		  << std::setw(10) << s.angle.get_angle(2) << " "
+		  << std::setw(10) << s.angle.get_angle(3) << " "
+		  << std::setw(10) << s.angle.get_angle(4) << " "
+		  << std::setw(10) << s.angle.get_angle(5) << " "
+		  << std::setw(10) << s.angle.get_angle(6) << " "
+		  << std::setw(10) << s.ex_angle.get_angle(1) << " "
+		  << std::setw(10) << s.ex_angle.get_angle(2) << " "
+		  << std::setw(10) << s.ex_angle.get_angle(3) << " "
+		  << std::setw(10) << s.m_cri[0] << " "
+		  << std::setw(10) << s.m_cri[1] << endl;
+}
 
 int calc_state(state *s, state *pre_s);
 

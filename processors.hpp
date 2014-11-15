@@ -33,6 +33,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 
+#include "state.h"
 #include "individual.hpp"
 #include "population.hpp"
 
@@ -272,7 +273,7 @@ template< typename T >class processor_traits
 public:
 	// \cond
 	typedef T  value_type;
-	static double run( T t, de::DVectorPtr vars ) { return t( vars); }
+	static double run( T& t, de::DVectorPtr vars ) { return t( vars); }
 	static T make( T t ) { return t; }
 	// \endcond
 };
@@ -417,6 +418,8 @@ public:
 				double result = processor_traits< T >::run( m_of, ind->vars());
 
 				ind->setCost( result );
+				ind->get_state() = m_of.get_state();
+//				print_state(ind->get_state());
 				m_listener->end_of( m_index, ind );
 			}
 			m_result = true;
@@ -493,7 +496,7 @@ private:
 	individual_queue m_indQueue;
 	processor_vector m_processors;
 	thread_group_ptr m_threads;
-	std::vector<T> m_of;
+//	std::vector<T> m_of;
 
 public:
 	/**

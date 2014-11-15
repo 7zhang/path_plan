@@ -20,7 +20,7 @@ private:
 	double limit_max[DIMENSION];
 	double mu[DIMENSION];
 	double sigma[DIMENSION];
-	std::vector<double> m_cri;
+	
 public:
 	robot_optimize_function(const std::string &name, state &s, state &pre_s)
 		: m_name(name), m_s(s), m_pre_s(pre_s)
@@ -47,7 +47,7 @@ public:
 				mu[i] = (limit_min[i] + limit_max[i]) / 2;
 				sigma[i] = (limit_max[i] - limit_min[i]) / 6;
 			}
-			m_cri.resize(2);
+			m_s.m_cri.resize(2);
 		}
 	double operator() (de::DVectorPtr args)
 		{
@@ -67,10 +67,10 @@ public:
 				double c2 = calc1();
 //				std::cout << "c2 = " << c2 / DIMENSION << endl;
 
-				m_cri[0] = ret;
-				m_cri[1] = c2;
+				m_s.m_cri[0] = ret;
+				m_s.m_cri[1] = c2;
 //				return ret;
-				return 0.5 * ret + 0.5 * c2 / DIMENSION;
+				return 0.5 * ret + 0.5 * c2;
 			}
 		}
 	double calc1() {
@@ -83,11 +83,11 @@ public:
 		}
 
 //		std::cout << "sum = " << sum << endl;
-		return sum;
+		return sum / DIMENSION;
 //		return exp(-sum);
 	}
 
-	const std::vector<double>& cri() { return m_cri; }
+//	const std::vector<double>& cri() { return m_cri; }
 	const std::string& name() const { return m_name; }
 	const state& get_state() const { return m_s; }
 };
@@ -209,21 +209,17 @@ int robot_path()
 			// 	  << best->cost() << std::endl;
 			std::cout << best->to_string() << " ";
 			//cout << of(best->vars()) << endl;
-			of(best->vars());
-			state best_state = of.get_state();
-			std::vector<double> cri = of.cri();
-			cout << std::setw(10) << best_state.angle.get_angle(1) << " "
-			     << std::setw(10) << best_state.angle.get_angle(2) << " "
-			     << std::setw(10) << best_state.angle.get_angle(3) << " "
-			     << std::setw(10) << best_state.angle.get_angle(4) << " "
-			     << std::setw(10) << best_state.angle.get_angle(5) << " "
-			     << std::setw(10) << best_state.angle.get_angle(6) << " "
-			     << std::setw(10) << best_state.ex_angle.get_angle(1) << " "
-			     << std::setw(10) << best_state.ex_angle.get_angle(2) << " "
-			     << std::setw(10) << best_state.ex_angle.get_angle(3) << " "
-			     << std::setw(10) << cri[0] << " " << std::setw(10) << cri[1]
-			     << endl;
-			pre_s = s;
+//			of(best->vars());
+//			state best_state = of.get_state();
+			state best_state = best->get_state();
+//			std::vector<double>& cri = of.cri();
+			print_state(best_state);
+			
+//			std::cout << "robot_optimize_function s: ";
+//			print_state(s);
+			pre_s = best_state;
+			// std::cout << "robot_optimize_function s: ";
+			// print_state(pre_s);
 
 			std::cerr << i << endl;
 		}

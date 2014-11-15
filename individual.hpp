@@ -34,6 +34,7 @@
 #include "de_types.hpp"
 #include "de_constraints.hpp"
 #include "multithread.hpp"
+#include "state.h"
 
 namespace de
 {
@@ -55,6 +56,7 @@ class individual
 {
 private:
 	de::DVectorPtr m_vars;
+	state m_s;
 	double m_cost;
 //	de::mutex m_mx;
 
@@ -110,6 +112,7 @@ public:
 	 * @return double 
 	 */
 	double cost() const { return m_cost; }
+	state& get_state() { return m_s; }
 
 	/**
 	 * Sets the variables to new random values within the 
@@ -231,9 +234,9 @@ public:
 	{
 		assert( ind );
 		double tmp = std::numeric_limits<double>::quiet_NaN();
-		if (!isnan(m_cost) && !isnan(ind->cost())) {
+		if (!std::isnan(m_cost) && !std::isnan(ind->cost())) {
 			return minimize ? *this <= *ind : *ind <= *this;
-		} else if (!isnan(ind->cost())) {
+		} else if (!std::isnan(ind->cost())) {
 			return false;
 		} else {
 			return true;

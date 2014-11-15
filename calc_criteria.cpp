@@ -1,3 +1,6 @@
+#ifndef _CALC_CRITERIA_H_
+#define _CALC_CRITERIA_H_
+
 #include "KunShanJacobi.h"
 #include "state.h"
 #include "calc_criteria.h"
@@ -22,7 +25,11 @@ double obj_function(state *s, state *pre_s, int *err)
 	} else {
 		criteria c;
 		calc_criteria(s, &c);
+		// std::cout << "s after calc_criteria: "; 
+		// print_state(*s);
 		*err = 0;
 		return c.j;
 	}
 }
+
+#endif /* _CALC_CRITERIA_H_ */
