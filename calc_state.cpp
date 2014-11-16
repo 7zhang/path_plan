@@ -84,7 +84,8 @@ int calc_state(state *s, state *pre_s)
 //		delete rob;
 		return -1;
 	}
-
+	to_continuous(s->angle, pre_s->angle);
+	to_continuous(s->ex_angle, pre_s->ex_angle);
 //	delete rob;
 	return 0;
 }

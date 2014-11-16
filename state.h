@@ -79,6 +79,45 @@ static inline void print_state(state& s)
 
 int calc_state(state *s, state *pre_s);
 
+static inline void to_continuous(JAngle &angle, JAngle &last)
+{
+	if (angle.get_angle(1) - last.get_angle(1) > 90) {
+		angle.set_angle(angle.get_angle(1) - 2 * 180, 1);
+	} else if (angle.get_angle(1) - last.get_angle(1) < -90) {
+		angle.set_angle(angle.get_angle(1) + 2 * 180, 1);
+	}
+
+	if (angle.get_angle(2) - last.get_angle(2) > 90) {
+		angle.set_angle(angle.get_angle(2) - 2 * 180, 2);
+	} else if (angle.get_angle(2) - last.get_angle(2) < -90) {
+		angle.set_angle(angle.get_angle(2) + 2 * 180, 2);
+	}
+
+	if (angle.get_angle(3) - last.get_angle(3) > 90) {
+		angle.set_angle(angle.get_angle(3) - 2 * 180, 3);
+	} else if (angle.get_angle(3) - last.get_angle(3) < -90) {
+		angle.set_angle(angle.get_angle(3) + 2 * 180, 3);
+	}
+
+	if (angle.get_angle(4) - last.get_angle(4) > 90) {
+		angle.set_angle(angle.get_angle(4) - 2 * 180, 4);
+	} else if (angle.get_angle(4) - last.get_angle(4) < -90) {
+		angle.set_angle(angle.get_angle(4) + 2 * 180, 4);
+	}
+
+	if (angle.get_angle(5) - last.get_angle(5) > 90) {
+		angle.set_angle(angle.get_angle(5) - 2 * 180, 5);
+	} else if (angle.get_angle(5) - last.get_angle(5) < -90) {
+		angle.set_angle(angle.get_angle(5) + 2 * 180, 5);
+	}
+
+	if (angle.get_angle(6) - last.get_angle(6) > 90) {
+		angle.set_angle(angle.get_angle(6) - 2 * 180, 6);
+	} else if (angle.get_angle(6) - last.get_angle(6) < -90) {
+		angle.set_angle(angle.get_angle(6) + 2 * 180, 6);
+	}
+}
+
 #endif
 
 

@@ -10,6 +10,9 @@
 
 using namespace de;
 
+int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, char *path);
+int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, char *path);
+
 #define DIMENSION 6
 class robot_optimize_function {
 private:
@@ -164,7 +167,11 @@ int robot_path()
 		// Vector3D normal(-0.000000, -0.707107, 0.707107);
 		// Vector3D tangent(-1.000000, 0.000000, 0.000000);
 		// Vector3D point(-250.000000, 500.000000, 80.000000);
+
+		vector<JAngle> best_angle;
+		vector<JAngle> best_ex_angle;
 		for (int i = 0; i < normal.size(); i++) {
+//		for (int i = 0; i < 1; i++) {
 			s.in.n = normal[i];
 			s.in.t = tangent[i];
 			s.in.p = point[i];
@@ -190,7 +197,7 @@ int robot_path()
 				boost::make_shared< null_processor_listener >() );
 			processors< robot_optimize_function >::processors_ptr _processors( 
 				boost::make_shared< processors< robot_optimize_function > >( 
-					1, boost::ref( of ), processor_listener ) );
+					4, boost::ref( of ), processor_listener ) );
 			termination_strategy_ptr terminationStrategy( 
 				boost::make_shared< max_gen_termination_strategy >( 2000 ) );
 			selection_strategy_ptr selectionStrategy(
@@ -212,22 +219,82 @@ int robot_path()
 //			of(best->vars());
 //			state best_state = of.get_state();
 			state best_state = best->get_state();
+
+			best_angle.push_back(best_state.angle);
+			best_ex_angle.push_back(best_state.ex_angle);
 //			std::vector<double>& cri = of.cri();
+//			to_continuous(best_state.angle, pre_s.angle);
 			print_state(best_state);
 			
 //			std::cout << "robot_optimize_function s: ";
 //			print_state(s);
+
 			pre_s = best_state;
 			// std::cout << "robot_optimize_function s: ";
 			// print_state(pre_s);
 
 			std::cerr << i << endl;
 		}
+
+		program_jpos(best_angle, best_ex_angle, "./program.glp");
 		return 0;
 	} catch (const de::exception &e)
 	{
 		std::cout << "an error occurred: " << e.what();
 	}
+}
+
+int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, char *path)
+{
+	for (int i = 1; i < angle.size(); i++) {
+		to_continuous(angle[i], angle[i - 1]);
+	}
+	FILE *file;
+	if((file = fopen(path, "wb")) == NULL) {
+		printf("open file %s error\n", path);
+		return -1;
+	}
+	
+	fwrite("//DATASEG\n", 1, 10, file);
+	for (int i = 0; i < angle.size(); i++) {
+		fprintf(file, "JPOS: loc%d=(%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
+			i + 1, angle[i].get_angle(1), angle[i].get_angle(2), angle[i].get_angle(3),
+			angle[i].get_angle(4), angle[i].get_angle(5), angle[i].get_angle(6),
+			ex_angle[i].get_angle(1), ex_angle[i].get_angle(2), ex_angle[i].get_angle(3));
+	}
+	
+	fwrite("//PROGRAMSEG\n", 1, 13, file);
+	
+	for (int j = 0; j < angle.size(); j++) {
+		fprintf(file, "MOVJ (loc%d,Vel=5.000,Acc=100.000,Jerk=100.000)\n", j + 1);
+	}
+	
+	return 0;
+}
+
+int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, char *path)
+{
+	FILE *file;
+	if((file = fopen(path, "wb")) == NULL) {
+		printf("open file %s error\n", path);
+		return -1;
+	}
+	
+	fwrite("//DATASEG\n", 1, 10, file);
+	for (int i = 0; i < rpy.size(); i++) {
+		fprintf(file, "CPOS: loc%d=(%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
+			i + 1, rpy[i].pos.dx, rpy[i].pos.dy, rpy[i].pos.dz,
+			rpy[i].orient.dx, rpy[i].orient.dy, rpy[i].orient.dz,			
+			ex_angle[i].get_angle(1), ex_angle[i].get_angle(2), ex_angle[i].get_angle(3));
+	}
+	
+	fwrite("//PROGRAMSEG\n", 1, 13, file);
+	
+	for (int j = 0; j < rpy.size(); j++) {
+		fprintf(file, "MOVL (loc%d,Vel=5.000,Acc=100.000,Jerk=100.000)\n", j + 1);
+	}
+	
+	return 0;
 }
 
 int main(int argc, char *argv[])
