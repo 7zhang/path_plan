@@ -1,10 +1,12 @@
 *.out
 *.o
 *.png
-log*
 *.glp
 *.log
 *~
 mylog
 \#*\#
 strace
+*.d.*
+*.d
+path_plan

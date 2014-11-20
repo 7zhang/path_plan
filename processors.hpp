@@ -419,6 +419,7 @@ public:
 
 				ind->setCost( result );
 				ind->get_state() = m_of.get_state();
+//				std::cout << "result " << ind->cost() << std::endl;
 //				print_state(ind->get_state());
 				m_listener->end_of( m_index, ind );
 			}

@@ -39,6 +39,12 @@ namespace de
 
 inline double genrand( double min = 0, double max = 1 )
 {
+/**
+ * rd and gen made static, otherwise genrand will open file /dev/urandom and read
+ * it every time it is called, results in great performance penalty
+ * maybe we can add another random number generate thread, with read buffers 
+ * for /dev/urandom
+ */
 	static std::random_device rd;
 	static boost::random::mt19937 gen(rd());
 	boost::random::uniform_real_distribution<> dist( min, max );

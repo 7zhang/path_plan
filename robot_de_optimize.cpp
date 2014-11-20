@@ -1,9 +1,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <limits>
 #include <string>
 #include <cmath>
 #include "differential_evolution.hpp"
+#include "kinematic_constraint.h"
 #include "load_seam.h"
 #include "state.h"
 #include "calc_criteria.h"
@@ -13,7 +15,7 @@ using namespace de;
 int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, char *path);
 int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, char *path);
 
-#define DIMENSION 6
+#define DIMENSION 9
 class robot_optimize_function {
 private:
 	const std::string m_name;
@@ -23,6 +25,7 @@ private:
 	double limit_max[DIMENSION];
 	double mu[DIMENSION];
 	double sigma[DIMENSION];
+	double m_power[DIMENSION];
 	
 public:
 	robot_optimize_function(const std::string &name, state &s, state &pre_s)
@@ -34,6 +37,9 @@ public:
 			limit_min[3] = -180.0;
 			limit_min[4] = -120.0;
 			limit_min[5] = -180.0;
+			limit_min[6] = 0.0;
+			limit_min[7] = -360.0;
+			limit_min[8] = -1700.0;
 			
 			limit_max[0] = 180.0;
 			limit_max[1] = 30.0;
@@ -41,6 +47,9 @@ public:
 			limit_max[3] = 180.0;
 			limit_max[4] = 120.0;
 			limit_max[5] = 180.0;
+			limit_max[6] = 90.0;
+			limit_max[7] = 360;
+			limit_max[8] = 1600.0;
 			// for (int i = 0; i < DIMENSION; i++) {
 			// 	limit_min[i] = m_pre_s.angle.angle[i] - 10;
 			// 	limit_max[i] = m_pre_s.angle.angle[i] + 10;
@@ -50,7 +59,17 @@ public:
 				mu[i] = (limit_min[i] + limit_max[i]) / 2;
 				sigma[i] = (limit_max[i] - limit_min[i]) / 6;
 			}
-			m_s.m_cri.resize(2);
+			m_s.m_cri.resize(6);
+			m_power[0] = 1;
+			m_power[1] = 1;
+			m_power[2] = 1;
+			m_power[3] = 1;
+			m_power[4] = 1;
+			m_power[5] = 1;
+			m_power[6] = 1;
+			m_power[7] = 5;
+			m_power[8] = 1;
+			
 		}
 	double operator() (de::DVectorPtr args)
 		{
@@ -63,31 +82,84 @@ public:
 			double ret = obj_function(&m_s, &m_pre_s, &err);
 			ret = ret / 376234706.2853961;
 			if (err) {
-				return 0;
-				return -1e6;
-//				return std::numeric_limits<double>::quiet_NaN();
+				// return 0;
+				// return -1e6;
+
+//				std::cout << "NAN returned" << std::endl;
+				return std::numeric_limits<double>::quiet_NaN();
 			} else {
-				double c2 = calc1();
+				double c1 = calc1();
+				double c4 = calc4();
 //				std::cout << "c2 = " << c2 / DIMENSION << endl;
 
 				m_s.m_cri[0] = ret;
-				m_s.m_cri[1] = c2;
+				m_s.m_cri[1] = c1;
+				m_s.m_cri[2] = c4;
+				return ret * c1 * c4;
+//				return c2;
 //				return ret;
-				return 0.5 * ret + 0.5 * c2;
 			}
 		}
 	double calc1() {
 		double sum = 0;
 
 		for (int i = 0; i < DIMENSION; i++) {
-//			std::cout << m_s.angle.angle[i] << " " << mu[i] << " " << sigma[i] << endl;
 			double tmp = m_s.angle.angle[i] - mu[i];
 			sum += exp(- tmp * tmp / 2 / sigma[i] / sigma[i]);
 		}
 
-//		std::cout << "sum = " << sum << endl;
 		return sum / DIMENSION;
-//		return exp(-sum);
+	}
+
+	double calc2() {
+		double sum = 0;
+
+		for (int i = 0; i < DIMENSION; i++) {
+			double tmp = m_s.angle.angle[i] - mu[i];
+			sum += - tmp * tmp / 2 / sigma[i] / sigma[i];
+		}
+
+		return 1 + sum;
+	}
+
+	double calc3() {
+		double sum = 0;
+
+		for (int i = 0; i < DIMENSION; i++) {
+			double tmp = m_s.angle.angle[i] - mu[i];
+			double l = sigma[i] * 3;
+			double t = tmp / l;
+			sum += 1 / (t * t - 1);
+		}
+
+		return 1 + sum / DIMENSION;
+	}
+
+	double calc4() {
+		double product = 1;
+		double pi = boost::math::constants::pi<double>();
+
+//		std::cout << "angle = " << std::endl;
+//		print_state(m_s);
+
+		for (int i = 0; i < 6; i++) {
+			double l = 6 * sigma[i];
+			double tmp = m_s.angle.angle[i] - mu[i];
+			double cosine = cos(tmp / l * pi);
+			cosine = pow(cosine, m_power[i]);
+			product *= cosine;
+		}
+
+		for (int i = 0; i < 3; i++) {
+			double l = 6 * sigma[i + 6];
+			double tmp = m_s.ex_angle.angle[i] - mu[i + 6];
+			double cosine = cos(tmp / l * pi);
+			cosine = pow(cosine, m_power[i + 6]);
+			product *= cosine;
+		}
+
+//		std::cout << "product = " << product << std::endl;
+		return product;
 	}
 
 //	const std::vector<double>& cri() { return m_cri; }
@@ -170,8 +242,11 @@ int robot_path()
 
 		vector<JAngle> best_angle;
 		vector<JAngle> best_ex_angle;
+
+		int err_count = 0;
+		
 		for (int i = 0; i < normal.size(); i++) {
-//		for (int i = 0; i < 1; i++) {
+		  //for (int i = 0; i < 1; i++) {
 			s.in.n = normal[i];
 			s.in.t = tangent[i];
 			s.in.p = point[i];
@@ -185,11 +260,17 @@ int robot_path()
 				(*constraints)[3] = boost::make_shared<real_constraint>(pre_s.in.fai1 - 10, pre_s.in.fai1 + 10);
 				(*constraints)[4] = boost::make_shared<real_constraint>(pre_s.in.fai2 - 10, pre_s.in.fai2 + 10);
 			} else {
-				(*constraints)[0] = boost::make_shared<real_constraint>(-1000, 1000);
-				(*constraints)[1] = boost::make_shared<real_constraint>(-180, 180);
-				(*constraints)[2] = boost::make_shared<real_constraint>(-180, 180);
-				(*constraints)[3] = boost::make_shared<real_constraint>(-180, 180);
-				(*constraints)[4] = boost::make_shared<real_constraint>(-180, 180);
+				(*constraints)[0] = boost::make_shared<real_constraint>(0, 1000);
+				(*constraints)[1] = boost::make_shared<real_constraint>(-90, 90);
+				(*constraints)[2] = boost::make_shared<real_constraint>(-90, 90);
+				(*constraints)[3] = boost::make_shared<real_constraint>(-90, 90);
+				(*constraints)[4] = boost::make_shared<real_constraint>(-90, 90);
+
+				// (*constraints)[0] = boost::make_shared<real_constraint>(-1000, 1000);
+				// (*constraints)[1] = boost::make_shared<real_constraint>(-180, 180);
+				// (*constraints)[2] = boost::make_shared<real_constraint>(-45, 45);
+				// (*constraints)[3] = boost::make_shared<real_constraint>(-90, 90);
+				// (*constraints)[4] = boost::make_shared<real_constraint>(-90, 90);
 			}
 			robot_optimize_function of(std::string("robot_optimize_function"), s, pre_s);
 			listener_ptr listener( boost::make_shared< null_listener >() );
@@ -199,9 +280,9 @@ int robot_path()
 				boost::make_shared< processors< robot_optimize_function > >( 
 					4, boost::ref( of ), processor_listener ) );
 			termination_strategy_ptr terminationStrategy( 
-				boost::make_shared< max_gen_termination_strategy >( 2000 ) );
+				boost::make_shared< max_gen_termination_strategy >( 200 ) );
 			selection_strategy_ptr selectionStrategy(
-				boost::make_shared< best_parent_child_selection_strategy >() );
+				boost::make_shared< tournament_selection_strategy >() );
 			mutation_strategy_arguments mutation_arguments( 0.8, 0.9 );
 			mutation_strategy_ptr mutationStrategy(
 				boost::make_shared< mutation_strategy_1 >( VARS_COUNT, mutation_arguments ) );
@@ -214,12 +295,22 @@ int robot_path()
 
 			// std::cout << "maximium value for the " << of.name() << " is " 
 			// 	  << best->cost() << std::endl;
-			std::cout << best->to_string() << " ";
+
 			//cout << of(best->vars()) << endl;
 //			of(best->vars());
 //			state best_state = of.get_state();
 			state best_state = best->get_state();
 
+			double diff = dist(best_state, pre_s);
+//			std::cout << "diff = " << diff << std::endl;
+			if (i > 0 && diff > 20 && err_count < 10) {
+				err_count++;
+				i--;
+				continue;
+			}
+
+			err_count = 0;
+			std::cout << best->to_string() << " ";
 			best_angle.push_back(best_state.angle);
 			best_ex_angle.push_back(best_state.ex_angle);
 //			std::vector<double>& cri = of.cri();
@@ -233,6 +324,7 @@ int robot_path()
 			// std::cout << "robot_optimize_function s: ";
 			// print_state(pre_s);
 
+//			std::cout << "i = " << i << std::endl;
 			std::cerr << i << endl;
 		}
 
@@ -246,9 +338,9 @@ int robot_path()
 
 int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, char *path)
 {
-	for (int i = 1; i < angle.size(); i++) {
-		to_continuous(angle[i], angle[i - 1]);
-	}
+	// for (int i = 1; i < angle.size(); i++) {
+	// 	to_continuous(angle[i], angle[i - 1]);
+	// }
 	FILE *file;
 	if((file = fopen(path, "wb")) == NULL) {
 		printf("open file %s error\n", path);

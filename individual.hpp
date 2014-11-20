@@ -233,12 +233,15 @@ public:
 	bool better_or_equal( const individual_ptr ind, bool minimize ) const
 	{
 		assert( ind );
-		double tmp = std::numeric_limits<double>::quiet_NaN();
+//		double tmp = std::numeric_limits<double>::quiet_NaN();
 		if (!std::isnan(m_cost) && !std::isnan(ind->cost())) {
+//			std::cout << "branch 1: " << m_cost << " " << ind->cost() << std::endl;
 			return minimize ? *this <= *ind : *ind <= *this;
 		} else if (!std::isnan(ind->cost())) {
+//			std::cout << "branch 2: " << m_cost << " " << ind->cost() << std::endl;
 			return false;
 		} else {
+//			std::cout << "branch 3: " << m_cost << " " << ind->cost() << std::endl;
 			return true;
 		}
 	}
@@ -258,8 +261,9 @@ public:
 	 */
 	bool better( const individual_ptr ind, bool minimize ) const
 	{
-		assert( ind );
-		return minimize ? *this < *ind : *ind < *this;
+		better_or_equal(ind, minimize);
+		// assert( ind );
+		// return minimize ? *this < *ind : *ind < *this;
 	}
 
 	/**

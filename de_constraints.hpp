@@ -222,6 +222,12 @@ public:
 		assert( min <= max );
 	}
 
+	real_constraint( double max )
+	: range_constraint( -max, max )
+	{
+		assert( max > 0 );
+	}
+
 	/**
 	 * returns a random value limited to the type and range of the 
 	 * constraint

@@ -192,6 +192,10 @@ public:
 				m_listener->endSelection( genCount );
 
 				m_listener->endGeneration( genCount, bestIndIteration, m_bestInd );
+				// std::cout << "genCount:" << genCount << ": " << std::endl;
+				// for (int i = 0; i < m_pop1->size(); i++) {
+				// 	std::cout << (*m_pop1)[i]->cost() << std::endl;
+				// }
 
 			}
 
