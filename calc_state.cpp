@@ -1,5 +1,6 @@
 #include "state.h"
 
+
 IKinematicAlg *rob = new KunshanRKA();
 
 int calc_state(state *s, state *pre_s)
@@ -24,7 +25,7 @@ int calc_state(state *s, state *pre_s)
 	after.y = _after.dy;
 	after.z = _after.dz;
 	
-	sa = positioner_inverse(&before, &after, &input->lim[6], &input->lim[7]);
+	sa = positioner_inverse(&before, &after, &input->lim[6], &input->lim[7], pre_s->ex_angle);
 	if(sa != NULL) {
 #ifdef DEBUG
 		printf("number of solution: %d\n", sa->num);
@@ -32,7 +33,13 @@ int calc_state(state *s, state *pre_s)
 			printf("solutions:(%lf, %lf)\n", sa->sol[i].theta1 * 180 / PI, sa->sol[i].theta2 * 180 / PI);
 		}
 #endif
-		
+
+		if (sa->num > 1) {
+			std::cout << "sa->num: " << sa->num << std::endl;
+			for (int i = 0; i < sa->num; i++)
+				std::cout << "theta1: " << sa->sol[i].theta1 * 180 / PI 
+					  << "theta2: " << sa->sol[i].theta2 * 180 / PI << std::endl;
+		}
 		s->ex_angle.set_angles(sa->sol[0].theta1 * 180 / PI, sa->sol[0].theta2 * 180 / PI, 0.0, 0.0, 0.0, 0.0);
 	} else {
 #ifdef DEBUG
@@ -42,8 +49,7 @@ int calc_state(state *s, state *pre_s)
 		return -1;
 	}
 
-	free(sa->sol);
-	free(sa);
+	free_solution(sa);
 
 	Vector3D axis_z;
 	axis_z = input->t * input->n;

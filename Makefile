@@ -8,7 +8,7 @@ all: $(OBJS)
 .c.o: 
 	g++ -std=c++11 $<
 clean:
-	@rm -f *.o *.d
+	@rm -f *.o *.d *.d.*
 
 %.d: %.cpp
 	@set -e; rm -f $@; g++ -std=c++11 -MM $< > $@.$$$$; \

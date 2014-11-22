@@ -67,7 +67,7 @@ public:
 			m_power[4] = 1;
 			m_power[5] = 1;
 			m_power[6] = 1;
-			m_power[7] = 3;
+			m_power[7] = 1;
 			m_power[8] = 1;
 			
 		}
@@ -136,6 +136,10 @@ public:
 	}
 
 	double calc4() {
+		if (!in_range()) {
+			return 0.0;
+		}
+
 		double product = 1;
 		double pi = boost::math::constants::pi<double>();
 
@@ -147,6 +151,7 @@ public:
 			double tmp = m_s.angle.angle[i] - mu[i];
 			double cosine = cos(tmp / l * pi);
 			cosine = pow(cosine, m_power[i]);
+//			std::cout << "cosine = " << cosine << std::endl;
 			product *= cosine;
 		}
 
@@ -155,11 +160,30 @@ public:
 			double tmp = m_s.ex_angle.angle[i] - mu[i + 6];
 			double cosine = cos(tmp / l * pi);
 			cosine = pow(cosine, m_power[i + 6]);
+//			std::cout << "cosine = " << cosine << std::endl;
 			product *= cosine;
 		}
 
 //		std::cout << "product = " << product << std::endl;
 		return product;
+	}
+
+	bool in_range() {
+		for (int i = 0; i < 6; i++) {
+			double tmp = m_s.angle.angle[i];
+			if (tmp < limit_min[i] || tmp > limit_max[i]) {
+				return false;
+			}
+		}
+
+		for (int i = 0; i < 3; i++) {
+			double tmp = m_s.ex_angle.angle[i];
+			if (tmp < limit_min[i + 6] || tmp > limit_max[i + 6]) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 //	const std::vector<double>& cri() { return m_cri; }
@@ -219,16 +243,19 @@ int robot_path()
 		s.in.lim[6].min = -10.0 * DEGREE_TO_RADIAN;
 		s.in.lim[6].step = 1.0 * DEGREE_TO_RADIAN;
 
+//		s.in.lim[7].max = 360.0 * DEGREE_TO_RADIAN;
+//		s.in.lim[7].min = -360 * DEGREE_TO_RADIAN;
+
 		s.in.lim[7].max = 180.0 * DEGREE_TO_RADIAN;
-		s.in.lim[7].min = -180 * DEGREE_TO_RADIAN;
+		s.in.lim[7].min = -180.0 * DEGREE_TO_RADIAN;
 		s.in.lim[7].step = 1.0 * DEGREE_TO_RADIAN;
 		s.in.x = 0.0;
 		s.in.theta = 0;
 		s.in.pthai = 0;
 		s.in.fai1 = 0.0;
 		s.in.fai2 = 0;
-		pre_s.angle.set_angles(0.0, -90.00, 90.00, 0.0, 0.0, 0.0);
-		pre_s.ex_angle.set_angles(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+		pre_s.angle.set_angles(15.0, -95.0/2, 15.0, 0.0, 0.0, 0.0);
+		pre_s.ex_angle.set_angles(45.0, 0.0, -50.0, 0.0, 0.0, 0.0);
 
 		std::vector<Vector3D> normal, tangent, point;
 		if (load_seam("test1.pos", point, normal, tangent)) {
@@ -246,6 +273,7 @@ int robot_path()
 		int err_count = 0;
 		
 		for (int i = 0; i < normal.size(); i++) {
+//			std::cout << "i = " << i << std::endl;
 		  //for (int i = 0; i < 1; i++) {
 			s.in.n = normal[i];
 			s.in.t = tangent[i];
@@ -254,15 +282,20 @@ int robot_path()
 			constraints_ptr constraints( boost::make_shared< constraints >(VARS_COUNT, -1.0e6, 1.0e6));
 
 			if (i != 0) {
-				(*constraints)[0] = boost::make_shared<real_constraint>(pre_s.in.x - 10, pre_s.in.x + 10);
-				(*constraints)[1] = boost::make_shared<real_constraint>(pre_s.in.theta - 10, pre_s.in.theta + 10);
-				(*constraints)[2] = boost::make_shared<real_constraint>(pre_s.in.pthai - 10, pre_s.in.pthai + 10);
-				(*constraints)[3] = boost::make_shared<real_constraint>(pre_s.in.fai1 - 10, pre_s.in.fai1 + 10);
-				(*constraints)[4] = boost::make_shared<real_constraint>(pre_s.in.fai2 - 10, pre_s.in.fai2 + 10);
+				(*constraints)[0] = boost::make_shared<real_constraint>(std::max(-1700.0, pre_s.in.x - 10), 
+							                                std::min(1600.0, pre_s.in.x + 10));
+				(*constraints)[1] = boost::make_shared<real_constraint>(pre_s.in.theta - 10, 
+											pre_s.in.theta + 10);
+				(*constraints)[2] = boost::make_shared<real_constraint>(std::max(-45.0, pre_s.in.pthai - 10),
+											std::min(45.0, pre_s.in.pthai + 10));
+				(*constraints)[3] = boost::make_shared<real_constraint>(pre_s.in.fai1 - 10, 
+						                                        pre_s.in.fai1 + 10);
+				(*constraints)[4] = boost::make_shared<real_constraint>(pre_s.in.fai2 - 10, 
+						                                        pre_s.in.fai2 + 10);
 			} else {
-				(*constraints)[0] = boost::make_shared<real_constraint>(0, 1000);
-				(*constraints)[1] = boost::make_shared<real_constraint>(-90, 90);
-				(*constraints)[2] = boost::make_shared<real_constraint>(-90, 90);
+				(*constraints)[0] = boost::make_shared<real_constraint>(-1700, 1600);
+				(*constraints)[1] = boost::make_shared<real_constraint>(-180, 180);
+				(*constraints)[2] = boost::make_shared<real_constraint>(-45, 45);
 				(*constraints)[3] = boost::make_shared<real_constraint>(-90, 90);
 				(*constraints)[4] = boost::make_shared<real_constraint>(-90, 90);
 
@@ -309,6 +342,9 @@ int robot_path()
 				continue;
 			}
 
+			if (err_count > 9) {
+				std::cerr << "failled but tried" << std::endl;
+			}
 			err_count = 0;
 			std::cout << best->to_string() << " ";
 			best_angle.push_back(best_state.angle);

@@ -3,6 +3,7 @@
 
 #include "volume.h"
 #include <math.h>
+#include "robotdata.h"
 
 #define PI 3.1415926535897932384626433832795
 #define DEGREE_TO_RADIAN (PI / 180)
@@ -23,6 +24,13 @@ typedef struct _limit {
 	double max;
 	double step;
 }limit;
+
+static inline void free_solution(solution_array *sa) {
+	if(sa->sol != NULL) {
+		free(sa->sol);
+	}
+	free(sa);
+}
 
 static inline int equal(double lhs, double rhs)
 {
@@ -55,7 +63,8 @@ static inline double equation2(double x1, double x2, double y1, double y3, doubl
 //return the number of solution
 int solve_trig_equation(double x1, double x2, double y, double *res1, double *res2);
 
-solution_array *positioner_inverse(vector3d *before, vector3d *after, limit *lim1, limit *lim2);
+solution_array *positioner_inverse(vector3d *before, vector3d *after, 
+				   limit *lim1, limit *lim2, JAngle& pre_angle);
 
 
 

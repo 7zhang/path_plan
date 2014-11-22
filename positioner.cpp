@@ -2,6 +2,17 @@
 #include <stdlib.h>
 #include "positioner.h"
 
+static inline double length_between(JAngle& lhs, JAngle& rhs)
+{
+	double tmp = 0;
+	for (int i = 0; i < 6; i++) {
+		double diff = lhs.angle[i] - rhs.angle[i];
+		tmp += diff * diff;
+	}
+	
+	return sqrt(tmp);
+}
+
 //solve equation x1 cos(t) - x2 sin(t) = y
 //return 0 if two sol, 1 if infinite sol, -1 if error
 int solve_trig_equation(double x1, double x2, double y, double *res1, double *res2)
@@ -50,7 +61,8 @@ int solve_trig_equation(double x1, double x2, double y, double *res1, double *re
 /* find theta1 and theta2 to satisfy T*before = after, where T is the
  * rotation part of the transformation matrix
  */
-solution_array *positioner_inverse(vector3d *before, vector3d *after, limit *lim1, limit *lim2)
+solution_array *positioner_inverse(vector3d *before, vector3d *after, 
+				   limit *lim1, limit *lim2, JAngle& pre_angle)
 {
 	double len1, len2;
 	len1 = length(before);
@@ -117,116 +129,115 @@ solution_array *positioner_inverse(vector3d *before, vector3d *after, limit *lim
 					}
 				}
 			}
-			if(sa->num > 0) {
-				return sa;
-			} else {
-				if(sa->sol != NULL) {
-					free(sa->sol);
-				}
-
-				free(sa);
-				return NULL;
-			}
+			break;
 		case 1:
 			//two theta1, infinite theta2
 			sa = (solution_array *)malloc(sizeof(solution_array));
 			sa->num = 0;
 			sa->sol = NULL;
-			if(lim2->step < 1e-6) {
-				return NULL;
-			}
+			// if(lim2->step < 1e-6) {
+			// 	return NULL;
+			// }
 			if(equal(theta1[0], theta1[1])) {
 				if(check_limit(theta1[0], lim1)) {
-					sa->num = (lim2->max - lim2->min) / lim2->step;
+					sa->num = 1;
 					sa->sol = (solution *)malloc(sizeof(solution) * sa->num);
-					for(i = 0; i < sa->num; ++i) {
-						sa->sol[i].theta1 = theta1[0];
-						sa->sol[i].theta2 = lim2->min + i * lim2->step;				
-					}
+					sa->sol[0].theta1 = theta1[0];
+					sa->sol[0].theta2 = pre_angle.get_angle(2);
+				} else {
+					return NULL;
 				}
 			} else {
-				int half = (lim2->max - lim2->min) / lim2->step;
-				sa->num = 2 * half;
+				sa->num = 2;
 				sa->sol = (solution *)malloc(sizeof(solution) * sa->num);
 				int index = 0;
 				if(check_limit(theta1[0], lim1)) {
-					for(i = 0; i < half; ++i) {
-						sa->sol[index].theta1 = theta1[0];
-						sa->sol[index].theta2 = lim2->min + i * lim2->step;
-						index++;
-					}
+					sa->sol[index].theta1 = theta1[0];
+					sa->sol[index].theta2 = pre_angle.get_angle(2);
+					index++;
 				}
 				if(check_limit(theta1[1], lim1)) {
-					for(i = 0; i < half; ++i) {
-						sa->sol[index].theta1 = theta1[1];
-						sa->sol[index].theta2 = lim2->min + i * lim2->step;
-						index++;
-					}
+					sa->sol[index].theta1 = theta1[1];
+					sa->sol[index].theta2 = pre_angle.get_angle(2);
+					index++;
 				}
 				sa->num = index;
 			}
-			if(sa->num > 0) {
-				return sa;
-			} else {
-				if(sa->sol != NULL) {
-					free(sa->sol);
-				}
-
-				free(sa);
-				return NULL;
-			}
+			break;
 		case 2:
 			//infinite theta1, two theta2
 			sa = (solution_array *)malloc(sizeof(solution_array));
 			sa->num = 0;
 			sa->sol = NULL;
-			if(lim1->step < 1e-6) {
-				return NULL;
-			}
+			// if(lim1->step < 1e-6) {
+			// 	return NULL;
+			// }
 			if(equal(theta2[0], theta2[1])) {
 				if(check_limit(theta2[0], lim2)) {
-					sa->num = (lim1->max - lim1->min) / lim1->step;
+					sa->num = 1;
 					sa->sol = (solution *)malloc(sizeof(solution) * sa->num);
-					for(j = 0; j < sa->num; ++j) {
-						sa->sol[j].theta1 = lim1->min + j * lim1->step;
-						sa->sol[j].theta2 = theta2[0];			
-					}
+					sa->sol[0].theta1 = pre_angle.get_angle(1);
+					sa->sol[0].theta2 = theta2[0];			
+				} else {
+					return NULL;
 				}
 			} else {
-				int half = (lim1->max - lim1->min) / lim1->step;
-				sa->num = 2 * half;
+				sa->num = 2;
 				sa->sol = (solution *)malloc(sizeof(solution) * sa->num);
 				int index = 0;
 				if(check_limit(theta2[0], lim2)) {
-					for(j = 0; j < half; ++j) {
-						sa->sol[index].theta1 = lim1->min + j * lim1->step;
-						sa->sol[index].theta2 = theta2[0];		
-						index++;
-					}
+					sa->sol[index].theta1 = pre_angle.get_angle(1);
+					sa->sol[index].theta2 = theta2[0];		
+					index++;
 				}
 				if(check_limit(theta2[1], lim2)) {
-					for(j = 0; j < half; ++j) {
-						sa->sol[index].theta1 = lim1->min + j * lim1->step;
-						sa->sol[index].theta2 = theta2[1];
-						index++;
-					}
+					sa->sol[index].theta1 = pre_angle.get_angle(1);
+					sa->sol[index].theta2 = theta2[1];
+					index++;
 				}
 				sa->num = index;
 			}
-			if(sa->num > 0) {
-				return sa;
-			} else {
-				if(sa->sol != NULL) {
-					free(sa->sol);
-				}
-
-				free(sa);
-				return NULL;
-			}
+			break;
 		case 3:
 			//infinite theta1, infinite theta2
-			return NULL;
+//			return NULL;
+			sa = (solution_array *)malloc(sizeof(solution_array));
+			sa->num = 1;
+			sa->sol = (solution *)malloc(sizeof(solution) * sa->num);
+			sa->sol[0].theta1 = pre_angle.get_angle(1);
+			sa->sol[0].theta2 = pre_angle.get_angle(2);
+			return sa;
 		}
+
+		
+		if(sa->num > 0) {
+			if (sa->num == 1) {
+				return sa;
+			}
+			solution_array *ret = (solution_array *)malloc(sizeof(solution_array));
+			ret->num = 1;
+			ret->sol = (solution *)malloc(sizeof(solution) * sa->num);
+			ret->sol[0] = sa->sol[0];
+			double best_diff1 = ret->sol[0].theta1 - pre_angle.get_angle(1);
+			double best_diff2 = ret->sol[0].theta2 - pre_angle.get_angle(2);
+			double best_dist = best_diff1 * best_diff1 + best_diff2 * best_diff2;
+			for(int i = 1; i < sa->num; i++) {
+				double tmp1, tmp2;
+				tmp1 = sa->sol[i].theta1 - pre_angle.get_angle(1);
+				tmp2 = sa->sol[i].theta2 - pre_angle.get_angle(2);
+				double length = tmp1 * tmp1 + tmp2 * tmp2;
+				if (length < best_dist) {
+					best_dist = length;
+					ret->sol[0] = sa->sol[i];
+				}
+			}
+			free_solution(sa);			
+			return ret;
+		}
+
+		free_solution(sa);
+
+		return NULL;
 	}
 	
 	return NULL;
