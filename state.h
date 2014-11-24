@@ -19,11 +19,12 @@ typedef struct input {
 	 * var[3] fai1
 	 * var[4] fai2
 	 */
-	double x;
+	double ex1; // position 0
+	double ex2; // position 1
+	double ex3; // rail 0
+	double pusi;
 	double theta;
-	double pthai;
-	double fai1;
-	double fai2;
+	double fi;
 
 	/*
 	 * limit[0] angle[0]
@@ -36,7 +37,7 @@ typedef struct input {
 	 * limit[7] ex_angle[1]
 	 * limit[8] ex_angle[2]
 	 */
-	limit lim[9];
+//	limit lim[9];
 } input;
 
 typedef struct criteria {
@@ -75,7 +76,10 @@ static inline void print_state(state& s)
 		  << std::setw(10) << s.ex_angle.get_angle(3) << " "
 		  << std::setw(10) << s.m_cri[0] << " "
 		  << std::setw(10) << s.m_cri[1] << " "
-		  << std::setw(10) << s.m_cri[2] << endl;
+		  << std::setw(10) << s.m_cri[2] << " "
+		  << std::setw(10) << s.m_cri[3] << " "
+		  << std::setw(10) << s.m_cri[4] << " "
+		  << std::setw(10) << s.m_cri[5] << std::endl;
 }
 
 static inline double dist(state& lhss, state& rhss)

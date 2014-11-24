@@ -45,6 +45,9 @@ inline double genrand( double min = 0, double max = 1 )
  * maybe we can add another random number generate thread, with read buffers 
  * for /dev/urandom
  */
+	if (min > max - 1e-6 && min < max + 1e-6) {
+		return min;
+	}
 	static std::random_device rd;
 	static boost::random::mt19937 gen(rd());
 	boost::random::uniform_real_distribution<> dist( min, max );

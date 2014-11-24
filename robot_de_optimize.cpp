@@ -38,7 +38,7 @@ public:
 			limit_min[4] = -120.0;
 			limit_min[5] = -180.0;
 			limit_min[6] = 0.0;
-			limit_min[7] = -180.0;
+			limit_min[7] = -360.0;
 			limit_min[8] = -1700.0;
 			
 			limit_max[0] = 180.0;
@@ -48,7 +48,7 @@ public:
 			limit_max[4] = 120.0;
 			limit_max[5] = 180.0;
 			limit_max[6] = 90.0;
-			limit_max[7] = 180;
+			limit_max[7] = 360.0;
 			limit_max[8] = 1600.0;
 			// for (int i = 0; i < DIMENSION; i++) {
 			// 	limit_min[i] = m_pre_s.angle.angle[i] - 10;
@@ -59,7 +59,7 @@ public:
 				mu[i] = (limit_min[i] + limit_max[i]) / 2;
 				sigma[i] = (limit_max[i] - limit_min[i]) / 6;
 			}
-			m_s.m_cri.resize(6);
+			m_s.m_cri.resize(10);
 			m_power[0] = 1;
 			m_power[1] = 1;
 			m_power[2] = 1;
@@ -69,37 +69,87 @@ public:
 			m_power[6] = 1;
 			m_power[7] = 1;
 			m_power[8] = 1;
-			
 		}
-	double operator() (de::DVectorPtr args)
-		{
-			int err;
-			m_s.in.x = (*args)[0];
-			m_s.in.theta = (*args)[1];
-			m_s.in.pthai = (*args)[2];
-			m_s.in.fai1 = (*args)[3];
-			m_s.in.fai2 = (*args)[4];
-			double ret = obj_function(&m_s, &m_pre_s, &err);
-			ret = ret / 376234706.2853961;
-			if (err) {
-				// return 0;
-				// return -1e6;
-
+	double operator() (de::DVectorPtr args)	{
+		m_s.in.ex1 = (*args)[0];
+		m_s.in.ex2 = (*args)[1];
+		m_s.in.ex3 = (*args)[2];
+		m_s.in.pusi = (*args)[3];
+		m_s.in.theta = (*args)[4];
+		m_s.in.fi = (*args)[5];
+		if (obj_function()) {
+			// return 0;
+			// return -1e6;
 //				std::cout << "NAN returned" << std::endl;
-				return std::numeric_limits<double>::quiet_NaN();
-			} else {
-				double c1 = calc1();
-				double c4 = calc4();
+			return std::numeric_limits<double>::quiet_NaN();
+		} else {
+			double c1 = calc1();
+			double c4 = calc4();
 //				std::cout << "c2 = " << c2 / DIMENSION << endl;
+			double pi = boost::math::constants::pi<double>();				
+			m_s.m_cri[1] = c1;
+			m_s.m_cri[2] = c4;
 
-				m_s.m_cri[0] = ret;
-				m_s.m_cri[1] = c1;
-				m_s.m_cri[2] = c4;
-				return ret * c1 * c4;
+			double tmp3 = m_s.m_cri[3];
+			double tmp4 = m_s.m_cri[4];
+			double tmp5 = m_s.m_cri[5];
+
+			if (tmp3 > 15.0 / 180 * pi) {
+				tmp3 = 15.0 / 180 * pi;
+			}
+
+			if (tmp4 > 15.0 / 180 * pi) {
+				tmp4 = 15.0 / 180 * pi;
+			}
+
+			if (tmp5 > 105.0 / 180 * pi) {
+				tmp5 = 105.0 / 180 * pi;
+			} else if (tmp5 < 75.0 / 180 * pi) {
+				tmp5 = 75.0 / 180 * pi;
+			}
+
+			tmp3 = cos(tmp3 * 6);
+			tmp4 = cos(tmp4 * 6);
+			tmp5 = cos((tmp5 - pi / 2) * 6);
+			if (tmp3 < 0.0) {
+				tmp3 = 0;
+			}
+
+			if (tmp4 < 0.0) {
+				tmp4 = 0;
+			}
+
+			if (tmp5 < 0.0) {
+				tmp5 = 0;
+			}
+
+			double cs = 1;
+			for (int i = 0; i < 3; i++) {
+				cs *= m_s.m_cri[i];
+			}
+
+			cs = cs * tmp3 * tmp4 * tmp5;
+//			cs = cs * m_s.m_cri[3] * m_s.m_cri[4] * m_s.m_cri[5];
+
+			return cs;//m_s.m_cri[0] * m_s.m_cri[1] * m_s.m_cri[2];
 //				return c2;
 //				return ret;
-			}
 		}
+	}
+
+	int obj_function() {
+		if (calc_state(&m_s, &m_pre_s)) {
+			return -1;
+		} else {
+			criteria c;
+			calc_criteria(&m_s, &c);
+			// std::cout << "s after calc_criteria: "; 
+			// print_state(*s);
+			m_s.m_cri[0] = c.j / 376234706.2853961;
+			return 0;
+		}
+	}
+
 	double calc1() {
 		double sum = 0;
 
@@ -232,28 +282,29 @@ public:
 		}
 };
 
-#define VARS_COUNT 5
+#define VARS_COUNT 6
 #define POPULATION_SIZE (VARS_COUNT * 10)
 
 int robot_path()
 {
 	try {
 		state s, pre_s;
-		s.in.lim[6].max = 91.0 * DEGREE_TO_RADIAN;
-		s.in.lim[6].min = -10.0 * DEGREE_TO_RADIAN;
-		s.in.lim[6].step = 1.0 * DEGREE_TO_RADIAN;
+		// s.in.lim[6].max = 91.0 * DEGREE_TO_RADIAN;
+		// s.in.lim[6].min = -10.0 * DEGREE_TO_RADIAN;
+		// s.in.lim[6].step = 1.0 * DEGREE_TO_RADIAN;
 
 //		s.in.lim[7].max = 360.0 * DEGREE_TO_RADIAN;
 //		s.in.lim[7].min = -360 * DEGREE_TO_RADIAN;
 
-		s.in.lim[7].max = 180.0 * DEGREE_TO_RADIAN;
-		s.in.lim[7].min = -180.0 * DEGREE_TO_RADIAN;
-		s.in.lim[7].step = 1.0 * DEGREE_TO_RADIAN;
-		s.in.x = 0.0;
-		s.in.theta = 0;
-		s.in.pthai = 0;
-		s.in.fai1 = 0.0;
-		s.in.fai2 = 0;
+		// s.in.lim[7].max = 180.0 * DEGREE_TO_RADIAN;
+		// s.in.lim[7].min = -180.0 * DEGREE_TO_RADIAN;
+		// s.in.lim[7].step = 1.0 * DEGREE_TO_RADIAN;
+		s.in.ex1 = 0.0;
+		s.in.ex2 = 0.0;
+		s.in.ex3 = 0.0;
+		s.in.pusi = 0.0;
+		s.in.theta = 0.0;
+		s.in.fi = 0.0;
 		pre_s.angle.set_angles(15.0, -95.0/2, 15.0, 0.0, 0.0, 0.0);
 		pre_s.ex_angle.set_angles(45.0, 0.0, -50.0, 0.0, 0.0, 0.0);
 
@@ -274,7 +325,7 @@ int robot_path()
 		
 		for (int i = 0; i < normal.size(); i++) {
 //			std::cout << "i = " << i << std::endl;
-		  //for (int i = 0; i < 1; i++) {
+//		for (int i = 0; i < 1; i++) {
 			s.in.n = normal[i];
 			s.in.t = tangent[i];
 			s.in.p = point[i];
@@ -282,22 +333,24 @@ int robot_path()
 			constraints_ptr constraints( boost::make_shared< constraints >(VARS_COUNT, -1.0e6, 1.0e6));
 
 			if (i != 0) {
-				(*constraints)[0] = boost::make_shared<real_constraint>(std::max(-1700.0, pre_s.in.x - 10), 
-							                                std::min(1600.0, pre_s.in.x + 10));
-				(*constraints)[1] = boost::make_shared<real_constraint>(pre_s.in.theta - 10, 
-											pre_s.in.theta + 10);
-				(*constraints)[2] = boost::make_shared<real_constraint>(std::max(-45.0, pre_s.in.pthai - 10),
-											std::min(45.0, pre_s.in.pthai + 10));
-				(*constraints)[3] = boost::make_shared<real_constraint>(pre_s.in.fai1 - 10, 
-						                                        pre_s.in.fai1 + 10);
-				(*constraints)[4] = boost::make_shared<real_constraint>(pre_s.in.fai2 - 10, 
-						                                        pre_s.in.fai2 + 10);
+				(*constraints)[0] = boost::make_shared<real_constraint>(std::max(-1700.0, pre_s.in.ex1 - 5), std::min(1600.0, pre_s.in.ex1 + 5));
+				(*constraints)[1] = boost::make_shared<real_constraint>(pre_s.in.ex2 - 5, pre_s.in.ex2 + 5);
+				// (*constraints)[2] = boost::make_shared<real_constraint>(std::max(-45.0, pre_s.in.pthai - 5),
+				// 							std::min(45.0, pre_s.in.pthai + 5));
+				(*constraints)[2] = boost::make_shared<real_constraint>(pre_s.in.ex3 - 5, pre_s.in.ex3 + 5);
+				(*constraints)[3] = boost::make_shared<real_constraint>(pre_s.in.pusi - 5, 
+						                                        pre_s.in.pusi + 5);
+				(*constraints)[4] = boost::make_shared<real_constraint>(pre_s.in.theta - 5, 
+						                                        pre_s.in.theta + 5);
+				(*constraints)[5] = boost::make_shared<real_constraint>(pre_s.in.fi - 5, 
+						                                        pre_s.in.fi + 5);
 			} else {
-				(*constraints)[0] = boost::make_shared<real_constraint>(-1700, 1600);
+				(*constraints)[0] = boost::make_shared<real_constraint>(0.0, 90);
 				(*constraints)[1] = boost::make_shared<real_constraint>(-180, 180);
-				(*constraints)[2] = boost::make_shared<real_constraint>(-45, 45);
-				(*constraints)[3] = boost::make_shared<real_constraint>(-90, 90);
-				(*constraints)[4] = boost::make_shared<real_constraint>(-90, 90);
+				(*constraints)[2] = boost::make_shared<real_constraint>(-1700, 1600);
+				(*constraints)[3] = boost::make_shared<real_constraint>(-30, 30);
+				(*constraints)[4] = boost::make_shared<real_constraint>(-30, 30);
+				(*constraints)[5] = boost::make_shared<real_constraint>(-30, 30);
 
 				// (*constraints)[0] = boost::make_shared<real_constraint>(-1000, 1000);
 				// (*constraints)[1] = boost::make_shared<real_constraint>(-180, 180);

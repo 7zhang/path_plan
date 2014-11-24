@@ -17,20 +17,4 @@ int calc_criteria(state *s, criteria *c)
 	return 0;
 }
 
-double obj_function(state *s, state *pre_s, int *err)
-{
-	if (calc_state(s, pre_s)) {
-		*err = -1;
-		return 0;
-	} else {
-		criteria c;
-
-		calc_criteria(s, &c);
-		// std::cout << "s after calc_criteria: "; 
-		// print_state(*s);
-		*err = 0;
-		return c.j;
-	}
-}
-
 #endif /* _CALC_CRITERIA_H_ */
