@@ -38,7 +38,7 @@ public:
 			limit_min[4] = -120.0;
 			limit_min[5] = -180.0;
 			limit_min[6] = 0.0;
-			limit_min[7] = -360.0;
+			limit_min[7] = -185.0;
 			limit_min[8] = -1700.0;
 			
 			limit_max[0] = 180.0;
@@ -48,7 +48,7 @@ public:
 			limit_max[4] = 120.0;
 			limit_max[5] = 180.0;
 			limit_max[6] = 90.0;
-			limit_max[7] = 360.0;
+			limit_max[7] = 185.0;
 			limit_max[8] = 1600.0;
 			// for (int i = 0; i < DIMENSION; i++) {
 			// 	limit_min[i] = m_pre_s.angle.angle[i] - 10;
@@ -67,7 +67,7 @@ public:
 			m_power[4] = 1;
 			m_power[5] = 1;
 			m_power[6] = 1;
-			m_power[7] = 1;
+			m_power[7] = 0.1;
 			m_power[8] = 1;
 		}
 	double operator() (de::DVectorPtr args)	{
