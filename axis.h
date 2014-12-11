@@ -13,8 +13,9 @@ private:
 	double m_vel_max;
 	double m_acc_max;
 	double m_time_interval;
-
-	criteria *m_c;
+	
+	std::vector<double> wave;
+	cri *m_c;
 public:
 axis(double min, double max, double vel_max, double acc_max, double time_interval, int c_type)
 	: m_min(min), m_max(max), m_vel_max(vel_max), m_acc_max(acc_max), m_time_interval(time_interval) {

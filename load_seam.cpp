@@ -7,7 +7,7 @@ using namespace std;
 #include "Transform.h"
 
 //#define DEBUG
-int load_seam(char *path, vector<Vector3D> &p, vector<Vector3D> &n, vector<Vector3D> &t)
+int load_seam(const char *path, vector<Vector3D> &p, vector<Vector3D> &n, vector<Vector3D> &t)
 {
 	p.clear();
 	n.clear();
