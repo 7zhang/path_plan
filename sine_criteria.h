@@ -5,7 +5,7 @@
 #include <boost/math/constants/constants.hpp>
 #include "criteria.h"
 
-class sine_criteria: public criteria {
+class sine_criteria: public cri {
 private:
 	double m_min;
 	double m_max;

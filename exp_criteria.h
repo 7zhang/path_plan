@@ -4,7 +4,7 @@
 #include <cassert>
 #include "criteria.h"
 
-class exp_criteria: public criteria {
+class exp_criteria: public cri {
 private:
 	double m_mu;
 	double m_sigma;
