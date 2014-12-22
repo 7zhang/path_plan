@@ -1,5 +1,13 @@
 #include "Kunshan_robot.h"
 
+/*
+ * nine axes
+ * four auxiliary variable: rpy and jacobi determinant
+ * 
+ *
+ *
+ */
+
 static void kunshan_robot::init()
 {
 	m_axis_nr = 9;
