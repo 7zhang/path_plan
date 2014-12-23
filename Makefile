@@ -1,8 +1,9 @@
 CXXFLAGS = -std=c++11
 flags = -O2 -lboost_program_options -lpthread -lboost_system -lboost_thread -std=c++11
-OBJS = robot_de_optimize.o function.o calc_criteria.o geometric.o \
-	calc_state.o KunShanJacobi.o positioner.o robotkinematic.o robotdata.o \
-	Transform.o load_seam.o
+OBJS = test.o axis.o KunShan_robot.o system_state.o teach_point.o \
+	 sine_criteria.o exp_criteria.o function.o calc_criteria.o \
+	geometric.o KunShanJacobi.o  robotkinematic.o robotdata.o \
+	Transform.o load_seam.o 
 all: $(OBJS)
 	g++ $(flags) -o path_plan $^
 .c.o: 

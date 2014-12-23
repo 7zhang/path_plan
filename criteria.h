@@ -3,8 +3,8 @@
 
 class cri {
 public:
-	virtual double operator() (double x);
-	virtual void set_para (double para);
+	virtual double operator() (double x) = 0;
+	virtual void set_para (double para) = 0;
 };
 
 #endif /* _CRITERIA_H_ */

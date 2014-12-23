@@ -34,11 +34,10 @@
 #include "de_types.hpp"
 #include "de_constraints.hpp"
 #include "multithread.hpp"
-#include "state.h"
+#include "system_state.h"
 
 namespace de
 {
-
 class individual;
 typedef boost::shared_ptr< individual > individual_ptr;
 
@@ -52,11 +51,12 @@ typedef boost::shared_ptr< individual > individual_ptr;
  * 
  * @author adrian (12/1/2011)
  */
+
 class individual
 {
 private:
 	de::DVectorPtr m_vars;
-	state m_s;
+//	 m_s;
 	double m_cost;
 //	de::mutex m_mx;
 
@@ -112,7 +112,7 @@ public:
 	 * @return double 
 	 */
 	double cost() const { return m_cost; }
-	state& get_state() { return m_s; }
+//	T& get_state() { return m_s; }
 
 	/**
 	 * Sets the variables to new random values within the 

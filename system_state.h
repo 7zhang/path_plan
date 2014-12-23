@@ -1,6 +1,19 @@
 #ifndef _SYSTEM_STATE_H_
 #define _SYSTEM_STATE_H_
 
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cmath>
+
+#include "differential_evolution.hpp"
+#include "axis.h"
+#include "geometric.h"
+#include "load_seam.h"
+#include "job.h"
+#include "teach_point.h"
+#include "system_state.h"
+
 class system_state
 {
 public:
@@ -8,9 +21,9 @@ public:
 	static int m_auxiliary_variable_nr;
 //	static int m_sub_cri_nr;
 
-	static Vector3D& m_p;
-	static Vector3D& m_n;
-	static Vector3D& m_t;
+	static Vector3D m_p;
+	static Vector3D m_n;
+	static Vector3D m_t;
 
 	static std::vector<axis> m_axes;
 	static std::vector<axis> m_auxiliary_variable;
@@ -19,7 +32,7 @@ public:
 	static std::vector<teach_point> m_teach_points;
 	static std::vector<double> m_weight;
 
-private:
+public:
 	std::vector<double> m_axes_values;
 	std::vector<double> m_auxiliary_variable_values;
 
@@ -29,10 +42,7 @@ private:
 
 	double m_cri;
 public:
-	system_state(Vector3D& p, Vector3D& n, Vector3D& t) {
-		m_p = p;
-		m_n = n;
-		m_t = t;
+	system_state() {
 		m_axes_values.resize(m_axis_nr);
 		m_auxiliary_variable_values.resize(m_auxiliary_variable_nr);
 		m_sub_cri_axis.resize(m_axis_nr);
@@ -40,24 +50,71 @@ public:
 		m_sub_cri_teach.resize(m_teach_points.size());
 	}
 
-	static void init() {}
+	void set_job(const Vector3D& p, const Vector3D& n, const Vector3D& t) {
+		m_p = p;
+		m_n = n;
+		m_t = t;
+	}
+
 	std::pair<double, double> get_range(int i) {
-		assert(i < m_map.size() - 1);
+		assert(i < m_map.size());
 		i = m_map[i];
+		assert(m_axes.size() > 0);
 		if (i < m_axes.size()) {
 			return m_axes[i].get_range();
 		} else {
 			int tmp = i - m_axes.size();
-			return m_axes[tmp].get_range();
+			return m_auxiliary_variable[tmp].get_range();
 		}
 	}
 
-        double operator() (de::DVectorPtr args) {
-		calc_criteria();
-		return m_cri;
+	int push_value() {
+		for (int i = 0; i < m_axes_values.size(); i++) {
+			if (m_axes[i].add_value(m_axes_values[i])) {
+				return -1;
+			}
+		}
+
+		for (int i = 0; i < m_auxiliary_variable.size(); i++) {
+			if (m_auxiliary_variable[i].add_value(m_auxiliary_variable_values[i])) {
+				return -1;
+			}
+		}
+
+		return 0;
+	}
+	void set_vars(int i, double value) {
+		assert(i < m_map.size());
+		i = m_map[i];
+		if (i < m_axes_values.size()) {
+			m_axes_values[i] = value;
+		} else {
+			int tmp = i - m_axes.size();
+			m_auxiliary_variable_values[tmp] = value;
+		}
 	}
 
-	void calc_criteria() {
+	double dist(system_state& rhs) {
+		double dist = 0.0;
+		for (int i = 0; i < m_axes_values.size(); i++) {
+			double tmp = m_axes_values[i] - rhs.m_axes_values[i];
+			dist += tmp * tmp;
+		}
+
+		for (int i = 0; i < m_auxiliary_variable_values.size(); i++) {
+			double tmp = m_auxiliary_variable_values[i] - rhs.m_auxiliary_variable_values[i];
+			dist += tmp * tmp;
+		}
+
+		return sqrt(dist);
+	}
+
+        /* double operator() (de::DVectorPtr args) { */
+	/* 	calc_criteria(); */
+	/* 	return m_cri; */
+	/* } */
+
+	double criteria() {
 		m_cri = 1.0;
 
 		for (int i = 0; i < m_axes.size(); i++) {
@@ -74,9 +131,9 @@ public:
 			m_sub_cri_teach[i] = m_teach_points[i](m_axes_values, m_auxiliary_variable_values);
 			m_cri *= m_sub_cri_teach[i];
 		}		
+		
+		return m_cri;
 	}
-
-	~system_state();
 };
 
 #endif /* _SYSTEM_STATE_H_ */

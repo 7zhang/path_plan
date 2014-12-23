@@ -2,15 +2,19 @@
 #include <limits>
 #include <utility>
 
-double axis::operator() (int t) {
+double axis::operator() (double value) {
 	if (m_c) {
-		return (*m_c)(wave[t]);
+		return (*m_c)(value);
 	} else {
+		return value;
 		return std::numeric_limits<double>::quiet_NaN();
 	}
 }
 
 std::pair<double, double> axis::get_range () {
+	if (wave.size() == 0) {
+		return std::pair<double, double>(m_min, m_max);
+	}
 	double max;
 	double min;
 
@@ -45,8 +49,21 @@ std::pair<double, double> axis::get_range () {
 	return std::pair<double, double>(std::max(m_min, min), std::min(m_max, max));
 }
 
-void axis::add_value (double value)
+int axis::add_value(double value)
 {
-	assert(value <= m_max && value >= m_min);
-	wave.push_back(value);
+	if (value <= m_max && value >= m_min) {
+		wave.push_back(value);
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
+double axis::last()
+{
+	if (wave.size()) {
+		return wave.back();
+	} else {
+		return (m_min + m_max) / 2.0;
+	}
 }

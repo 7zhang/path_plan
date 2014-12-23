@@ -15,13 +15,11 @@ public:
 		m_size = m_normal.size();
 	};
 	
-	const Vector3D& get_n(int index);
-	const Vector3D& get_t(int index);
-	const Vector3D& get_p(int index);
+	const Vector3D& get_n(int index) { return m_normal[index]; };
+	const Vector3D& get_t(int index) { return m_tangent[index]; };
+	const Vector3D& get_p(int index) { return m_point[index]; };
 
 	int get_size() { return m_size; }
-
-	virtual ~job();
 };
 
 
