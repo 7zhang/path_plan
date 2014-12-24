@@ -10,6 +10,8 @@ class kunshan_robot: public system_state
 public:
 kunshan_robot():system_state(){ rob = new KunshanRKA(); }
 	static void init();
+	void check();
+	void print_trans(std::string name, TRANS& trans);
 	double operator() (de::DVectorPtr args);
 };
 

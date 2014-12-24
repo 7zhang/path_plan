@@ -9,10 +9,12 @@ private:
 public:
 	job(std::string seam) {
 		if (load_seam(seam.c_str(), m_point, m_normal, m_tangent)) {
-			std::cout << "load_seam error: " << seam << std::endl;
+			std::cerr << "load_seam error: " << seam << std::endl;
 		}
 
 		m_size = m_normal.size();
+
+		std::cerr << "load seam file: " << seam << std::endl;
 	};
 	
 	const Vector3D& get_n(int index) { return m_normal[index]; };

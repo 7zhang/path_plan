@@ -68,6 +68,17 @@ public:
 		}
 	}
 
+	double get_var_value(int i) {
+		assert(i < m_map.size());
+		i = m_map[i];
+		assert(m_axes.size() > 0);
+		if (i < m_axes.size()) {
+			return m_axes[i].last();
+		} else {
+			int tmp = i - m_axes.size();
+			return m_auxiliary_variable[tmp].last();
+		}
+	}
 	int push_value() {
 		for (int i = 0; i < m_axes_values.size(); i++) {
 			if (m_axes[i].add_value(m_axes_values[i])) {
@@ -92,6 +103,31 @@ public:
 			int tmp = i - m_axes.size();
 			m_auxiliary_variable_values[tmp] = value;
 		}
+	}
+
+	std::string to_string() const
+	{
+		std::ostringstream os;
+//		os.precision(16);
+//		os << std::setw(10);
+		os.width(10);
+
+		//os << "cost: " << cost() << ", vars: ";
+		os << m_cri << " ";
+
+		for (int i = 0; i < m_axes_values.size(); i++)
+		{
+			os.width(10);
+			os << m_axes_values[i] << " ";
+		}
+
+		for (int i = 0; i < m_auxiliary_variable_values.size(); i++)
+		{
+			os.width(10);
+			os << m_auxiliary_variable_values[i] << " ";
+		}
+
+		return os.str();
 	}
 
 	double dist(system_state& rhs) {

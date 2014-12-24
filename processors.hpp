@@ -418,6 +418,8 @@ public:
 				double result = processor_traits< T >::run( m_of, ind->vars());
 
 				ind->setCost( result );
+//				std::cout << m_of.to_string() << std::endl;
+//				std::cout << result << std::endl;
 //				ind->get_state() = m_of.get_state();
 //				std::cout << "result " << ind->cost() << std::endl;
 //				print_state(ind->get_state());

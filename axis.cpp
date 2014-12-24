@@ -46,7 +46,7 @@ std::pair<double, double> axis::get_range () {
 			- m_vel_max * (m_time_interval - t2);
 	}
 
-	return std::pair<double, double>(std::max(m_min, min), std::min(m_max, max));
+	return std::pair<double, double>(std::max(std::max(m_min, min), last() - 5), std::min(std::min(m_max, max), last() + 5));
 }
 
 int axis::add_value(double value)
