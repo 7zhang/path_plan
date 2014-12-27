@@ -85,7 +85,7 @@ robot_system(std::string sys_name, int redundancy, int pop_size, int time_interv
 		m_pop_size(pop_size), m_time_interval(time_interval),
 		m_stl_path(stl_path), m_job(seam) {
 		m_thread_nr = 4;
-		m_weight = 0.8;
+		m_weight = 0.4;
 		m_crossover = 0.9;
 	}
 	void path_plan();
@@ -135,8 +135,12 @@ void robot_system<T>::path_plan()
 		typename de::processors< T >::processors_ptr _processors( 
 			boost::make_shared< de::processors< T > >( 
 				m_thread_nr, boost::ref( cur_state ), processor_listener ) );
+		/* de::termination_strategy_ptr terminationStrategy(  */
+		/* 	boost::make_shared< de::max_gen_termination_strategy >( 300 ) ); */
+
 		de::termination_strategy_ptr terminationStrategy( 
-			boost::make_shared< de::max_gen_termination_strategy >( 800 ) );
+			boost::make_shared< de::min_devitaion_termination_strategy >( 1e-10 ) );
+
 		de::selection_strategy_ptr selectionStrategy(
 			boost::make_shared< de::tournament_selection_strategy >() );
 		de::mutation_strategy_arguments mutation_arguments( m_weight, m_crossover );

@@ -95,21 +95,22 @@ double kunshan_robot::operator() (de::DVectorPtr args) {
 	// m_s.in.theta = (*args)[4];
 	// m_s.in.fi = (*args)[5];
 
+	double pi = boost::math::constants::pi<double>();
 	TRANS gun_in_seam(0.0, 0.0, -1.0, 
 			  1.0, 0.0, 0.0, 
 			  0.0, -1.0, 0.0,
 			  0.0, 0.0, 0.0);
-	TRANS rotateY(cos((*args)[3]), 0.0, -sin((*args)[3]),
+	TRANS rotateY(cos((*args)[3] / 180.0 * pi), 0.0, -sin((*args)[3] / 180.0 * pi),
 		      0.0, 1.0, 0.0,
-		      sin((*args)[3]), 0.0, cos((*args)[3]),
+		      sin((*args)[3] / 180.0 * pi), 0.0, cos((*args)[3] / 180.0 * pi),
 		      0.0, 0.0, 0.0);
 	TRANS rotateX(1.0, 0.0, 0.0,
-		      0.0, cos((*args)[4]), sin((*args)[4]),
-		      0.0, -sin((*args)[4]), cos((*args)[4]),
+		      0.0, cos((*args)[4] / 180.0 * pi), sin((*args)[4] / 180.0 * pi),
+		      0.0, -sin((*args)[4] / 180.0 * pi), cos((*args)[4] / 180.0 * pi),
 		      0.0, 0.0, 0.0);
 
-	TRANS rotateZ(cos((*args)[5]), sin((*args)[5]), 0.0,
-		      -sin((*args)[5]), cos((*args)[5]), 0.0,
+	TRANS rotateZ(cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi), 0.0,
+		      -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi), 0.0,
 		      0.0, 0.0, 1.0,
 		      0.0, 0.0, 0.0);
 	gun_in_seam = rotateX * rotateY * gun_in_seam * rotateX;

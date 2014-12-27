@@ -160,7 +160,8 @@ public:
 			m_listener->start();
 			individual_ptr bestIndIteration( m_bestInd );
 
-			for( size_t genCount = 0 ; m_terminationStrategy->event( m_bestInd, genCount ); ++genCount ) 
+			size_t genCount;
+			for( genCount = 0 ; m_terminationStrategy->event( m_bestInd, genCount, *m_pop1 ); ++genCount ) 
 			{
 				m_listener->startGeneration( genCount );
 				for( size_t i = 0; i < m_popSize; ++i) 
@@ -192,12 +193,14 @@ public:
 				m_listener->endSelection( genCount );
 
 				m_listener->endGeneration( genCount, bestIndIteration, m_bestInd );
-				 // std::cout << "genCount:" << genCount << ": " << std::endl;
-				 // for (int i = 0; i < m_pop1->size(); i++) {
-				 // 	std::cout << (*m_pop1)[i]->cost() << std::endl;
-				 // }
+				  // std::cout << "genCount:" << genCount << ": " << std::endl;
+				  // for (int i = 0; i < m_pop1->size(); i++) {
+				  // 	std::cout << (*m_pop1)[i]->cost() << std::endl;
+				  // }
 
 			}
+
+			std::cout << "genCount:" << genCount << ": " << std::endl;
 
 			BOOST_SCOPE_EXIT_TPL( (m_listener) )
 			{
