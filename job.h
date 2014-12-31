@@ -1,6 +1,8 @@
 #ifndef _JOB_H_
 #define _JOB_H_
 
+#include "load_seam.h"
+
 class job
 {
 private:
@@ -20,6 +22,10 @@ public:
 	const Vector3D& get_n(int index) { return m_normal[index]; };
 	const Vector3D& get_t(int index) { return m_tangent[index]; };
 	const Vector3D& get_p(int index) { return m_point[index]; };
+
+	const std::vector<Vector3D>& get_n() { return m_normal; };
+	const std::vector<Vector3D>& get_t() { return m_tangent; };
+	const std::vector<Vector3D>& get_p() { return m_point; };
 
 	int get_size() { return m_size; }
 };
