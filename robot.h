@@ -153,7 +153,7 @@ void robot_system<T>::path_plan()
 		de.run();
 		de::individual_ptr best = de.best();
 
-		std::cout << best->cost() << endl;
+		std::cerr << best->cost() << endl;
 
 		double cost = cur_state(best->vars());
 		double diff = cur_state.dist(pre_state);

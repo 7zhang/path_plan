@@ -52,8 +52,8 @@ void kunshan_robot::init()
 	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0); 
 	m_auxiliary_variable[2] = axis(-180.0, 180.0, 3.0, 3.0, 10, 0, 1.0); 
 	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);
-	m_auxiliary_variable[4] = axis(0.0, 15.0, 3.0, 3.0, 10, 0, 3.0);
-	m_auxiliary_variable[5] = axis(75.0, 105.0, 3.0, 3.0, 10, 0, 3.0);
+	m_auxiliary_variable[4] = axis(0.0, 15.0, 3.0, 3.0, 10, 0, 1.0);
+	m_auxiliary_variable[5] = axis(75.0, 105.0, 3.0, 3.0, 10, 0, 1.0);
 
 	m_map.push_back(6);
 	m_map.push_back(7);
@@ -71,6 +71,16 @@ void kunshan_robot::init()
 		mu_axis[i] = m_axes[i].mid();
 		sigma_axis[i] = m_axes[i].length() / 6.0;
 	}
+
+	mu_axis[0] = 36;
+	sigma_axis[0] = 30;
+
+
+	mu_axis[2] = 70;
+	sigma_axis[2] = 30;
+	
+	mu_axis[7] = 150;
+	sigma_axis[7] = 30;
 
 	teach_point t1(mu_axis, sigma_axis, offset_axis, weight_axis, mu_axis, sigma_axis, offset_axis, weight_axis);
 	m_teach_points.push_back(t1);
