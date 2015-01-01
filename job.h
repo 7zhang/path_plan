@@ -10,22 +10,31 @@ private:
 	std::vector<Vector3D> m_normal, m_tangent, m_point;
 public:
 	job(std::string seam) {
-		if (load_seam(seam.c_str(), m_point, m_normal, m_tangent)) {
-			std::cerr << "load_seam error: " << seam << std::endl;
+		if (!seam.empty()) {
+			cout << seam.c_str();
+			std::cerr << "load seam file: " << seam << std::endl;
+			if (load_seam(seam.c_str(), m_point, m_normal, m_tangent)) {
+				std::cerr << "load_seam error: " << seam << std::endl;
+			}
+
+			m_size = m_normal.size();
+		} else {
+			m_size = 0;
 		}
+	}
 
-		m_size = m_normal.size();
-
-		std::cerr << "load seam file: " << seam << std::endl;
-	};
+	job(std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) :
+	m_point(p), m_normal(n), m_tangent(t) {
+		m_size = p.size();
+	}
 	
-	const Vector3D& get_n(int index) { return m_normal[index]; };
-	const Vector3D& get_t(int index) { return m_tangent[index]; };
-	const Vector3D& get_p(int index) { return m_point[index]; };
+	const Vector3D& get_n(int index) { return m_normal[index]; }
+	const Vector3D& get_t(int index) { return m_tangent[index]; }
+	const Vector3D& get_p(int index) { return m_point[index]; }
 
-	const std::vector<Vector3D>& get_n() { return m_normal; };
-	const std::vector<Vector3D>& get_t() { return m_tangent; };
-	const std::vector<Vector3D>& get_p() { return m_point; };
+	std::vector<Vector3D>& get_n() { return m_normal; }
+	std::vector<Vector3D>& get_t() { return m_tangent; }
+	std::vector<Vector3D>& get_p() { return m_point; }
 
 	int get_size() { return m_size; }
 };

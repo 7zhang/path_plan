@@ -88,13 +88,23 @@ robot_system(std::string sys_name, int redundancy, int pop_size, int time_interv
 		m_weight = 0.4;
 		m_crossover = 0.9;
 	}
-	void path_plan();
+
+robot_system(std::string sys_name, int redundancy, int pop_size, int time_interval, 
+	     std::vector<std::string> stl_path, job j) :
+	m_sys_name(sys_name), m_redundancy(redundancy),
+		m_pop_size(pop_size), m_time_interval(time_interval),
+		m_stl_path(stl_path) , m_job(j){
+			m_thread_nr = 4;
+			m_weight = 0.4;
+			m_crossover = 0.9;
+	}
+	void operator()();
 	void set_de_args(int pop_size, int thread_nr, double weight, double crossover);
 };
 
 
 template <typename T>
-void robot_system<T>::path_plan()
+void robot_system<T>::operator()()
 {
 	T::init();
 	T pre_state;
