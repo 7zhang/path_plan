@@ -32,7 +32,13 @@ static inline double angle_between(Vector3D& lhs, Vector3D& rhs)
  *
  */
 
-void kunshan_robot::init()
+void kunshan_robot::init(int& m_axis_nr,
+	int& m_auxiliary_variable_nr,
+	std::vector<axis>& m_axes,
+	std::vector<axis>& m_auxiliary_variable,
+	std::vector<int>& m_map,
+	std::vector<teach_point>& m_teach_points,
+	std::vector<double>& m_weight)
 {
 	m_axis_nr = 9;
 	m_axes.resize(9);

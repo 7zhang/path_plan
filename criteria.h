@@ -3,7 +3,7 @@
 
 class cri {
 public:
-	virtual double operator() (double x) = 0;
+	virtual double operator() (double x) const = 0;
 	virtual void set_para (double para) = 0;
 };
 

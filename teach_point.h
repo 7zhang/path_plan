@@ -26,7 +26,7 @@ public:
 		  m_offset_axis(offset_axis), m_weight_axis(weight_axis),
 		  m_mu_aux(mu_aux), m_sigma_aux(sigma_aux), 
 		  m_offset_aux(offset_aux), m_weight_aux(weight_aux) {}
-	double operator() (std::vector<double> &arg_axis, std::vector<double> &arg_aux);
+	double operator() (std::vector<double> &arg_axis, std::vector<double> &arg_aux) const;
 };
 
 #endif /* _TEACH_POINT_H_ */

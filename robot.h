@@ -78,15 +78,30 @@ private:
 	std::vector<std::string> m_stl_path;
 //	std::string m_seam;
 	job m_job;
+
+	int m_axis_nr;
+	int m_auxiliary_variable_nr;
+//	static int m_sub_cri_nr;
+
+	/* Vector3D m_p; */
+	/* Vector3D m_n; */
+	/* Vector3D m_t; */
+
+	std::vector<axis> m_axes;
+	std::vector<axis> m_auxiliary_variable;
+	std::vector<int> m_map;
+
+	std::vector<teach_point> m_teach_points;
+	std::vector<double> m_teach_weight;
+
 public:
 robot_system(std::string sys_name, int redundancy, int pop_size, int time_interval, 
 	     std::vector<std::string> stl_path, std::string seam):
 	m_sys_name(sys_name), m_redundancy(redundancy),
 		m_pop_size(pop_size), m_time_interval(time_interval),
 		m_stl_path(stl_path), m_job(seam) {
-		m_thread_nr = 4;
-		m_weight = 0.4;
-		m_crossover = 0.9;
+		T::init(m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+		optimize_init();
 	}
 
 robot_system(std::string sys_name, int redundancy, int pop_size, int time_interval, 
@@ -94,20 +109,42 @@ robot_system(std::string sys_name, int redundancy, int pop_size, int time_interv
 	m_sys_name(sys_name), m_redundancy(redundancy),
 		m_pop_size(pop_size), m_time_interval(time_interval),
 		m_stl_path(stl_path) , m_job(j){
-			m_thread_nr = 4;
-			m_weight = 0.4;
-			m_crossover = 0.9;
+		T::init(m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+		optimize_init();
+	}
+
+	void optimize_init() {
+		m_thread_nr = 4;
+		m_weight = 0.4;
+		m_crossover = 0.9;
 	}
 	void operator()();
 	void set_de_args(int pop_size, int thread_nr, double weight, double crossover);
+
+	int push_value(T& s) {
+		for (int i = 0; i < s.m_axes_values.size(); i++) {
+			if (m_axes[i].add_value(s.m_axes_values[i])) {
+				return -1;
+			}
+		}
+
+		for (int i = 0; i < s.m_auxiliary_variable.size(); i++) {
+			if (m_auxiliary_variable[i].add_value(s.m_auxiliary_variable_values[i])) {
+				return -1;
+			}
+		}
+
+		return 0;
+	}
 };
 
 
 template <typename T>
 void robot_system<T>::operator()()
 {
-	T::init();
-	T pre_state;
+//	T::init();
+	T pre_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(0), m_job.get_n(0), m_job.get_t(0),
+		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 	pre_state.m_axes_values[0] = 15.0;
 	pre_state.m_axes_values[1] = -95.0/2;
 	pre_state.m_axes_values[2] = 15.0;
@@ -126,12 +163,13 @@ void robot_system<T>::operator()()
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
 		cerr << "i = " << i << std::endl;
-		T cur_state;
-		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));
+		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
+		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+//		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));
 			
 		de::constraints_ptr constraints( boost::make_shared< de::constraints >(m_redundancy, -1.0e6, 1.0e6));
 		for (int j = 0; j < m_redundancy; j++) {
-			std::pair<double, double> tmp = (m_states.back()).get_range(j);
+			std::pair<double, double> tmp = cur_state.get_range(j);
 //			std::cout << "j = " << j << ":" << tmp.first << ", " << tmp.second << endl;
 			(*constraints)[j] = boost::make_shared<de::real_constraint>(tmp.first, tmp.second);
 //			double pre = pre_state.get_var_value(j);
@@ -196,7 +234,7 @@ void robot_system<T>::operator()()
 		/* } */
 
 //		std::cout << std::endl;
-		if (cur_state.push_value()) {
+		if (push_value(cur_state)) {
 			std::cout << "state illegal" << std::endl;
 			break;
 		}

@@ -2,7 +2,7 @@
 #include <limits>
 #include <utility>
 
-double axis::operator() (double value) {
+double axis::operator() (double value) const {
 	if (m_c) {
 		return (*m_c)(value);
 	} else {
@@ -11,7 +11,7 @@ double axis::operator() (double value) {
 	}
 }
 
-std::pair<double, double> axis::get_range () {
+std::pair<double, double> axis::get_range () const {
 	if (wave.size() == 0) {
 		return std::pair<double, double>(m_min, m_max);
 	}
@@ -59,7 +59,7 @@ int axis::add_value(double value)
 	}
 }
 
-double axis::last()
+double axis::last() const
 {
 	if (wave.size()) {
 		return wave.back();

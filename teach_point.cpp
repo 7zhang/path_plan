@@ -1,7 +1,7 @@
 #include "teach_point.h"
 #include "exp_criteria.h"
 
-double teach_point::operator() (std::vector<double> &arg_axis, std::vector<double> &arg_aux) {
+double teach_point::operator() (std::vector<double> &arg_axis, std::vector<double> &arg_aux) const {
 	double cri = 1.0;
 	double sum = 0.0;
 	for (int i = 0; i < m_mu_axis.size(); i++) {

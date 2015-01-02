@@ -21,7 +21,7 @@ sine_criteria(double min, double max, double lamda)
 
 	void set_para(double para);
 	
-	double operator() (double x);
+	double operator() (double x) const;
 };
 
 #endif /* _SINE_CRITERIA_H_ */

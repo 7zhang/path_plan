@@ -1,7 +1,7 @@
 #include "sine_criteria.h"
 #include <cmath>
 
-double sine_criteria::operator() (double x)
+double sine_criteria::operator() (double x) const
 {
 	if (x <= m_min || x >= m_max) {
 		return 0.0;

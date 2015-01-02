@@ -1,7 +1,7 @@
 #include "exp_criteria.h"
 #include <cmath>
 
-double exp_criteria::operator() (double x)
+double exp_criteria::operator() (double x) const
 {
 	if (m_sigma == 0.0) {
 		return x;

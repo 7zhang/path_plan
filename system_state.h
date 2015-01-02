@@ -17,20 +17,20 @@
 class system_state
 {
 public:
-	static int m_axis_nr;
-	static int m_auxiliary_variable_nr;
-//	static int m_sub_cri_nr;
+	const int m_axis_nr;
+	const int m_auxiliary_variable_nr;
+//	int m_sub_cri_nr;
 
-	static Vector3D m_p;
-	static Vector3D m_n;
-	static Vector3D m_t;
+	const Vector3D& m_p;
+	const Vector3D& m_n;
+	const Vector3D& m_t;
 
-	static std::vector<axis> m_axes;
-	static std::vector<axis> m_auxiliary_variable;
-	static std::vector<int> m_map;
+	const std::vector<axis>& m_axes;
+	const std::vector<axis>& m_auxiliary_variable;
+	const std::vector<int>& m_map;
 
-	static std::vector<teach_point> m_teach_points;
-	static std::vector<double> m_weight;
+	const std::vector<teach_point>& m_teach_points;
+	const std::vector<double>& m_weight;
 
 public:
 	std::vector<double> m_axes_values;
@@ -42,7 +42,19 @@ public:
 
 	double m_cri;
 public:
-	system_state() {
+	system_state(int axis_nr, 
+		     int auxiliary_variable_nr,
+		     const Vector3D& p,
+		     const Vector3D& n,
+		     const Vector3D& t,
+		     const std::vector<axis>& axes,
+		     const std::vector<axis>& auxiliary_variable,
+		     const std::vector<int>& map,
+		     const std::vector<teach_point>& teach_points,
+		     const std::vector<double>& weight)
+		: m_axis_nr(axis_nr), m_auxiliary_variable_nr(auxiliary_variable_nr),
+		m_p(p), m_n(n), m_t(t), m_axes(axes), m_auxiliary_variable(auxiliary_variable),
+		m_map(map), m_teach_points(teach_points), m_weight(weight) {
 		m_axes_values.resize(m_axis_nr);
 		m_auxiliary_variable_values.resize(m_auxiliary_variable_nr);
 		m_sub_cri_axis.resize(m_axis_nr);
@@ -50,11 +62,11 @@ public:
 		m_sub_cri_teach.resize(m_teach_points.size());
 	}
 
-	void set_job(const Vector3D& p, const Vector3D& n, const Vector3D& t) {
-		m_p = p;
-		m_n = n;
-		m_t = t;
-	}
+	/* void set_job(const Vector3D& p, const Vector3D& n, const Vector3D& t) { */
+	/* 	m_p = p; */
+	/* 	m_n = n; */
+	/* 	m_t = t; */
+	/* } */
 
 	std::pair<double, double> get_range(int i) {
 		assert(i < m_map.size());
@@ -68,6 +80,14 @@ public:
 		}
 	}
 
+	const system_state& operator=(const system_state& rhs) {
+		m_axes_values = rhs.m_axes_values;
+		m_auxiliary_variable_values = rhs.m_auxiliary_variable_values;
+		m_sub_cri_axis = rhs.m_sub_cri_axis;
+		m_sub_cri_aux = rhs.m_sub_cri_aux;
+		m_sub_cri_teach = rhs.m_sub_cri_teach;
+		m_cri = rhs.m_cri;
+	}
 	double get_var_value(int i) {
 		assert(i < m_map.size());
 		i = m_map[i];
@@ -79,21 +99,7 @@ public:
 			return m_auxiliary_variable[tmp].last();
 		}
 	}
-	int push_value() {
-		for (int i = 0; i < m_axes_values.size(); i++) {
-			if (m_axes[i].add_value(m_axes_values[i])) {
-				return -1;
-			}
-		}
 
-		for (int i = 0; i < m_auxiliary_variable.size(); i++) {
-			if (m_auxiliary_variable[i].add_value(m_auxiliary_variable_values[i])) {
-				return -1;
-			}
-		}
-
-		return 0;
-	}
 	void set_vars(int i, double value) {
 		assert(i < m_map.size());
 		i = m_map[i];

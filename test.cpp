@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 {
 	std::vector<std::string> stl_path;
 	robot_system<kunshan_robot> kunshan("kunshan robot", 6, 60, 0.001, stl_path, "test1.pos");
-	kunshan.path_plan();
+	kunshan();
 	
 	return 0;
 }

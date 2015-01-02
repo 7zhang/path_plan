@@ -38,12 +38,12 @@ axis(double min, double max, double vel_max, double acc_max, double time_interva
 	}
 	axis(){}
 
-	double operator() (double value);
-	double mid() { return (m_min + m_max) / 2.0; }
-	double length() { return m_max - m_min; }
-	std::pair<double, double> get_range ();
-	int add_value (double value);
-	double last();
+	double operator() (double value) const;
+	double mid() const { return (m_min + m_max) / 2.0; }
+	double length() const { return m_max - m_min; }
+	std::pair<double, double> get_range() const;
+	int add_value(double value);
+	double last() const;
 };
 
 #endif /* _AXIS_H_ */
