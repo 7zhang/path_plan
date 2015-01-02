@@ -7,7 +7,8 @@ using namespace jsonrpc;
 using namespace std;
 int main(int argc, char *argv[])
 {
-    HttpClient httpclient("http://223.3.63.147:8383");
+//    HttpClient httpclient("http://223.3.63.147:8383");
+    HttpClient httpclient("http://localhost:8383");
     path_plan_client c(httpclient);
 
     if (argc != 2) {

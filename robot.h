@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
+#include <sstream>
 #include "stdio.h"
 #include "differential_evolution.hpp"
 #include "axis.h"
@@ -65,6 +65,7 @@ template <typename T>
 class robot_system
 {
 private:
+	int m_job_id;
 	std::string m_sys_name;
 	int m_redundancy;
 	int m_time_interval;
@@ -95,21 +96,19 @@ private:
 	std::vector<double> m_teach_weight;
 
 public:
-robot_system(std::string sys_name, int redundancy, int pop_size, int time_interval, 
-	     std::vector<std::string> stl_path, std::string seam):
-	m_sys_name(sys_name), m_redundancy(redundancy),
-		m_pop_size(pop_size), m_time_interval(time_interval),
+robot_system(int job_id, int pop_size, int time_interval, 
+	     std::vector<std::string> stl_path, std::string seam) :
+	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
 		m_stl_path(stl_path), m_job(seam) {
-		T::init(m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		optimize_init();
 	}
 
-robot_system(std::string sys_name, int redundancy, int pop_size, int time_interval, 
+robot_system(int job_id, int pop_size, int time_interval, 
 	     std::vector<std::string> stl_path, job j) :
-	m_sys_name(sys_name), m_redundancy(redundancy),
-		m_pop_size(pop_size), m_time_interval(time_interval),
+	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
 		m_stl_path(stl_path) , m_job(j){
-		T::init(m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		optimize_init();
 	}
 
@@ -135,6 +134,14 @@ robot_system(std::string sys_name, int redundancy, int pop_size, int time_interv
 		}
 
 		return 0;
+	}
+
+	std::string get_sys_info() {
+		std::stringstream ss;
+		ss << "system: " << m_sys_name << std::endl
+		   << "redundancy: " << m_redundancy << std::endl;
+
+		return ss.str();
 	}
 };
 
@@ -162,7 +169,8 @@ void robot_system<T>::operator()()
 
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
-		cerr << "i = " << i << std::endl;
+		cerr << "job " << m_job_id << ": ";
+		cerr << "i = " << i << ", ";
 		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
 		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 //		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));
@@ -216,7 +224,7 @@ void robot_system<T>::operator()()
 			std::cerr << "failled but tried" << std::endl;
 		}
 		err_count = 0;
-		
+
 		std::cout << cur_state.to_string() << std::endl;
 
 //		cur_state.check();
