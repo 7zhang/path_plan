@@ -9,4 +9,4 @@ mylog
 strace
 *.d.*
 *.d
-path_plan
+\.*
