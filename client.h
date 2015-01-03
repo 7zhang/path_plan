@@ -14,7 +14,7 @@ class path_plan_client : public jsonrpc::Client
     public:
         path_plan_client(jsonrpc::IClientConnector &conn, jsonrpc::clientVersion_t type = jsonrpc::JSONRPC_CLIENT_V2) : jsonrpc::Client(conn, type) {}
 
-        int jsontest(std::vector<std::vector<Vector3D> >& para) throw (jsonrpc::JsonRpcException)
+        int start_new(std::vector<std::vector<Vector3D> >& para) throw (jsonrpc::JsonRpcException)
         {
 		Json::Value p, n, t;
 		Json::Value tmp;
@@ -41,17 +41,36 @@ class path_plan_client : public jsonrpc::Client
 		pp["para2"] = n;
 		pp["para3"] = t;
 
-		Json::Value result = this->CallMethod("jsontest",pp);
-		/* if (result.isInt()) { */
-		/* 	return result.asInt(); */
-		/* } else */
-		/* 	throw jsonrpc::JsonRpcException(jsonrpc::Errors::ERROR_CLIENT_INVALID_RESPONSE, result.toStyledString()); */
+		Json::Value result = this->CallMethod("start_new",pp);
+		if (result.isInt()) {
+			return result.asInt();
+		} else {
+			throw jsonrpc::JsonRpcException(jsonrpc::Errors::ERROR_CLIENT_INVALID_RESPONSE,
+							result.toStyledString());
+		}
         }
         void notifyServer() throw (jsonrpc::JsonRpcException)
         {
 		Json::Value p;
 		p = Json::nullValue;
 		this->CallNotification("notifyServer",p);
+        }
+
+	std::pair<int, int> get_finish_rate(int job_id) throw (jsonrpc::JsonRpcException)
+        {
+		Json::Value p;
+		p["para1"] = job_id;
+		Json::Value result = this->CallMethod("get_finish_rate", p);
+//		cout << result.toStyledString() << endl;
+
+		if (result.isObject()) {
+			int size = result["size"].asInt();
+			int finished = result["finished"].asInt();
+			return make_pair(size, finished);
+		} else {
+			throw jsonrpc::JsonRpcException(jsonrpc::Errors::ERROR_CLIENT_INVALID_RESPONSE,
+							result.toStyledString());
+		}
         }
 };
 

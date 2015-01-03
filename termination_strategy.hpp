@@ -150,8 +150,8 @@ public:
 		sigma = sqrt(sigma / size);
 		
 //		std::cout << "sigma = " << sigma << std::endl;
-		return (max_cost == 0 || sigma > m_min);
-		return (max_cost < m_min || sigma > m_min);
+		return ((max_cost == 0 || sigma > m_min) && genCount < 500);
+//		return (max_cost < m_min || sigma > m_min);
 //		return sigma > m_min;
 	}
 };

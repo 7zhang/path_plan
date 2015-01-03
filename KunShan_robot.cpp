@@ -124,16 +124,21 @@ double kunshan_robot::operator() (de::DVectorPtr args) {
 		      0.0, 1.0, 0.0,
 		      sin((*args)[3] / 180.0 * pi), 0.0, cos((*args)[3] / 180.0 * pi),
 		      0.0, 0.0, 0.0);
-	TRANS rotateX(1.0, 0.0, 0.0,
+	TRANS rotateXL(1.0, 0.0, 0.0,
 		      0.0, cos((*args)[4] / 180.0 * pi), sin((*args)[4] / 180.0 * pi),
 		      0.0, -sin((*args)[4] / 180.0 * pi), cos((*args)[4] / 180.0 * pi),
 		      0.0, 0.0, 0.0);
 
-	TRANS rotateZ(cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi), 0.0,
-		      -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi), 0.0,
-		      0.0, 0.0, 1.0,
+	TRANS rotateXR(1.0, 0.0, 0.0,
+		      0.0, cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi),
+		      0.0, -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi),
 		      0.0, 0.0, 0.0);
-	gun_in_seam = rotateX * rotateY * gun_in_seam * rotateX;
+
+	// TRANS rotateZ(cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi), 0.0,
+	// 	      -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi), 0.0,
+	// 	      0.0, 0.0, 1.0,
+	// 	      0.0, 0.0, 0.0);
+	gun_in_seam = rotateXL * rotateY * gun_in_seam * rotateXR;
 
 //	print_trans("gun_in_seam", gun_in_seam);
 	
@@ -194,12 +199,12 @@ double kunshan_robot::operator() (de::DVectorPtr args) {
 
 	// print_trans("t6_in_robot1", t6_in_robot1);
 
-	TRANS t6;
-	rob->PositiveRobot(angle, t6);
+	// TRANS t6;
+	// rob->PositiveRobot(angle, t6);
 
 //	print_trans("t6", t6);
 
-	TRANS torch_in_world1 = Transform::getTransWorldToBase(ex_angle) * t6 * Transform::getTrans6ToTorch();
+	// TRANS torch_in_world1 = Transform::getTransWorldToBase(ex_angle) * t6 * Transform::getTrans6ToTorch();
 
 //	print_trans("torch_in_world1", torch_in_world1);
 

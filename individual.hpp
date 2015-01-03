@@ -304,7 +304,7 @@ public:
 	}
 };
 
-typedef std::queue< individual_ptr > individual_queue_base;
+typedef std::vector< individual_ptr > individual_queue_base;
 
 /**
  * A thread safe queue of individuals 
@@ -316,8 +316,8 @@ typedef std::queue< individual_ptr > individual_queue_base;
  */
 class individual_queue : public individual_queue_base
 {
-private:
-	de::mutex m_mx;
+// private:
+// 	de::mutex m_mx;
 
 public:
 	/**
@@ -331,9 +331,9 @@ public:
 	 */
 	void push_back( individual_ptr ind )
 	{
-		de::lock lock( m_mx );
+//		de::lock lock( m_mx );
 
-		individual_queue_base::push( ind );
+		individual_queue_base::push_back( ind );
 	}
 
 	/**
@@ -347,21 +347,21 @@ public:
 	 * @return individual_ptr the individual at the top of the queue 
 	 *  	   or null individual if the queue is empty
 	 */
-	individual_ptr pop()
-	{
-		de::lock lock( m_mx );
+	// individual_ptr pop()
+	// {
+	// 	de::lock lock( m_mx );
 
-		if( !individual_queue_base::empty() )
-		{
-			individual_ptr p( individual_queue_base::front() );
+	// 	if( !individual_queue_base::empty() )
+	// 	{
+	// 		individual_ptr p( individual_queue_base::front() );
 
-			individual_queue_base::pop();
+	// 		individual_queue_base::pop();
 
-			return p;
-		}
-		else
-			return individual_ptr();
-	}
+	// 		return p;
+	// 	}
+	// 	else
+	// 		return individual_ptr();
+	// }
 };
 
 }

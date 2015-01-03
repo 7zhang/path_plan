@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <map>
 #include "stdio.h"
 #include "differential_evolution.hpp"
 #include "axis.h"
@@ -65,6 +68,12 @@ template <typename T>
 class robot_system
 {
 private:
+//      lock m_continue and m_i	
+	boost::mutex m_mutex;
+	boost::condition_variable m_cond;
+	int m_continue;
+	int m_i;
+
 	int m_job_id;
 	std::string m_sys_name;
 	int m_redundancy;
@@ -99,7 +108,7 @@ public:
 robot_system(int job_id, int pop_size, int time_interval, 
 	     std::vector<std::string> stl_path, std::string seam) :
 	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
-		m_stl_path(stl_path), m_job(seam) {
+		m_stl_path(stl_path), m_job(seam), m_i(-1), m_continue(1) {
 		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		optimize_init();
 	}
@@ -107,7 +116,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 robot_system(int job_id, int pop_size, int time_interval, 
 	     std::vector<std::string> stl_path, job j) :
 	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
-		m_stl_path(stl_path) , m_job(j){
+		m_stl_path(stl_path) , m_job(j), m_i(-1), m_continue(1){
 		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		optimize_init();
 	}
@@ -143,8 +152,82 @@ robot_system(int job_id, int pop_size, int time_interval,
 
 		return ss.str();
 	}
-};
 
+	std::pair<int, int> get_finish_rate() {
+		boost::unique_lock<boost::mutex> lock(m_mutex);
+//		cout << "m_continue: " << m_continue << endl;
+		if (m_continue != 0) {
+			m_cond.wait(lock);
+		}
+		int size = m_job.get_size();
+
+		if (m_continue == 0 && m_i < size - 1) {
+			return make_pair(-size, m_i + 1);
+		} else {
+			return make_pair(size, m_i + 1);
+		}
+	}
+
+	int set_sys_parameter(std::string para_name, void *para_value) {
+		boost::unique_lock<boost::mutex> lock(m_mutex);
+		if (m_continue != 0) {
+			m_continue = 0;
+		}
+
+		int tmp_i;
+		double tmp_d;
+		switch (para_name) {
+		case "de_pop_size":
+			tmp_i = *(int *)para_value;
+			if (tmp_i < 0) {
+				std::cerr << "can't set de_pop_size to " << tmp_i
+					  << ", value illegal" << std::endl;
+				return -1;
+			}
+			m_pop_size = tmp_i;
+			std::cerr << "de_pop_size in job " << m_job_id
+				  << "changed to " << m_pop_size << std::endl;
+			break;
+		case "de_thread_nr":
+			tmp_i = *(int *)para_value;
+			if (tmp_i < 0) {
+				std::cerr << "can't set de_thread_nr to " << tmp_i
+					  << ", value illegal" << std::endl;
+				return -1;
+			}
+			m_thread_nr = tmp_i;
+			std::cerr << "de_thread_nr in job " << m_job_id
+				  << "changed to " << m_thread_nr << std::endl;
+			break;
+		case "de_weight":
+			tmp_d = *(double *)para_value;
+			if (tmp_d < 0.0 || tmp_d > 2.0) {
+				std::cerr << "can't set de_weight to " << tmp_d
+					  << ", value illegal" << std::endl;
+				return -1;
+			}
+
+			m_weight = tmp_d;
+			std::cerr << "de_weight in job " << m_job_id
+				  << "changed to " << m_weight << std::endl;
+			break;
+		case "de_crossover":
+			tmp_d = *(double *)para_value;
+			if (tmp_d < 0.0 || tmp_d > 1.0) {
+				std::cerr << "can't set de_crossover to " << tmp_d
+					  << ", value illegal" << std::endl;
+				return -1;
+			}
+
+			m_crossover = tmp_d;
+			std::cerr << "de_crossover in job " << m_job_id
+				  << "changed to " << m_crossover << std::endl;
+			break;
+		}
+
+		return 0;
+	}
+};
 
 template <typename T>
 void robot_system<T>::operator()()
@@ -169,8 +252,8 @@ void robot_system<T>::operator()()
 
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
-		cerr << "job " << m_job_id << ": ";
-		cerr << "i = " << i << ", ";
+//		cerr << "job " << m_job_id << ": ";
+//		cerr << "i = " << i << ", ";
 		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
 		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 //		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));
@@ -225,7 +308,7 @@ void robot_system<T>::operator()()
 		}
 		err_count = 0;
 
-		std::cout << cur_state.to_string() << std::endl;
+//		std::cout << cur_state.to_string() << std::endl;
 
 //		cur_state.check();
 //		std::cout << "cost: ";
@@ -259,8 +342,19 @@ void robot_system<T>::operator()()
 		/* continue; */
 
 		pre_state = cur_state;
-		std::cout << std::endl;
+//		std::cout << std::endl;
+
+		boost::unique_lock<boost::mutex> lock(m_mutex);
+		m_cond.notify_one();
+		if (! m_continue) {
+			break;
+		}
+		m_i = i;
 	}
+
+	boost::unique_lock<boost::mutex> lock(m_mutex);
+	m_continue = 0;
+	m_cond.notify_one();
 
 	program_jpos(best_angle, best_ex_angle, "./program.glp");
 }

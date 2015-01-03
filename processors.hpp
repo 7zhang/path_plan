@@ -377,6 +377,7 @@ private:
 	individual_queue& m_indQueue;
 	processor_listener_ptr m_listener;
 	size_t m_index;
+	size_t m_thread_count;
 
 	bool m_result;
 
@@ -394,8 +395,8 @@ public:
 	 *  			   important events during the processing of the
 	 *  			   objective function
 	 */
-	processor( size_t index, T of, individual_queue& indQueue, processor_listener_ptr listener)
-		: m_of( processor_traits< T >::make( of ) ), m_indQueue( indQueue ), m_result( false ), m_listener( listener ), m_index( index )
+	processor( size_t thread_count, size_t index, T of, individual_queue& indQueue, processor_listener_ptr listener)
+		: m_of( processor_traits< T >::make( of ) ), m_indQueue( indQueue ), m_result( false ), m_listener( listener ), m_index( index ), m_thread_count(thread_count)
 	{
 		assert( listener );
 	}
@@ -412,8 +413,11 @@ public:
 		m_result = false;
 		try
 		{
-			for( individual_ptr ind = m_indQueue.pop(); ind; ind = m_indQueue.pop() )
+			int size = m_indQueue.size();
+			for (int i = m_index; i < size; i = i + m_thread_count)
+//			for( individual_ptr ind = m_indQueue.pop(); ind; ind = m_indQueue.pop() )
 			{
+				individual_ptr ind = m_indQueue[i];
 				m_listener->start_of( m_index, ind );
 				double result = processor_traits< T >::run( m_of, ind->vars());
 
@@ -520,7 +524,7 @@ public:
 		for( size_t n = 0; n < count; ++n )
 		{
 
-			processor_ptr processor( boost::make_shared< processor< T > >( n, of, boost::ref( m_indQueue ), 
+			processor_ptr processor( boost::make_shared< processor< T > >( count, n, of, boost::ref( m_indQueue ), 
 										       listener ) );
 			m_processors.push_back( processors< T >::processor_ptr( processor ) ) ;
 		}
@@ -533,7 +537,7 @@ public:
 	 * 
 	 * @param ind 
 	 */
-	void push( individual_ptr ind ) { m_indQueue.push( ind ); }
+	void push( individual_ptr ind ) { m_indQueue.push_back( ind ); }
 	/**
 	 * starts all processors threads asynchronously (it will not 
 	 * wait for them to finish)
@@ -564,9 +568,10 @@ public:
 	{
 		m_threads->join_all();
 
-		if( !m_indQueue.empty() )
-			throw processors_exception( "threads ended before emptying the queue");
+		// if( !m_indQueue.empty() )
+		// 	throw processors_exception( "threads ended before emptying the queue");
 
+		m_indQueue.clear();
 		if( !success() )
 			throw processors_exception( "objective function error");
 	}

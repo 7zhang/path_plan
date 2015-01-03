@@ -11,10 +11,16 @@ using namespace std;
 using namespace jsonrpc;
 
 template <typename T>
-void path_plan_server<T>::jsontest(const Json::Value &request, Json::Value &response)
+void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &response)
 {
 //	cout << request.toStyledString() << endl;
 	if (! request.isObject()) {
+		response = -1;
+		return;
+	}
+
+	if (!(request.isMember("para1") && request.isMember("para2") && request.isMember("para3")))
+	{
 		response = -1;
 		return;
 	}
@@ -40,15 +46,42 @@ void path_plan_server<T>::jsontest(const Json::Value &request, Json::Value &resp
 	job myjob(p, n, t);
 //	robot_system<kunshan_robot> kunshan("kunshan robot", 6, 60, 0.001, stl_path, myjob);
 	T *work = new T(m_works.size(), 60, 0.001, stl_path, myjob);
-	boost::thread* th( new boost::thread(boost::ref(*work)) );
-	std::cout << work->get_sys_info() << std::endl;
 	m_works.push_back(work);
+
+	std::cout << work->get_sys_info();
+	std::cout << "add job " << m_works.size() - 1 << std::endl << std::endl;
+
+	boost::thread* th( new boost::thread(boost::ref(*work)) );
 	boost::thread_group m_threads;
 	m_threads.add_thread( th );
 
-	std::cout << "add job " << m_works.size() - 1 << std::endl;
-
 	response = m_works.size() - 1;
+}
+
+template <typename T>
+void path_plan_server<T>::get_finish_rate(const Json::Value &request, Json::Value &response)
+{
+//	cerr << request.toStyledString() << endl;
+	if (! request.isObject()) {
+		response = -1;
+		return;
+	}
+
+	if (! request.isMember("para1"))
+	{
+		response = -1;
+		return;
+	}
+	Json::Value j = request["para1"];
+
+	int job_id = j.asInt();
+	if (job_id >= m_works.size()) {
+		response = -1;
+		return;
+	}
+	std::pair<int, int> ret = m_works[job_id]->get_finish_rate();
+	response["size"] = ret.first;
+	response["finished"] = ret.second;
 }
 
 int main()
