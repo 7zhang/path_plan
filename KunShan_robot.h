@@ -18,7 +18,7 @@ kunshan_robot(int axis_nr, int auxiliary_variable_nr,
 //	static void init();
 	void check();
 	void print_trans(std::string name, TRANS& trans);
-	double operator() (de::DVectorPtr args);
+//	double operator() (de::DVectorPtr args);
 
 	/* static void init(int& m_axis_nr, int& m_auxiliary_variable_nr, */
 	/* 	  std::vector<axis>& m_axes, std::vector<axis>& m_auxiliary_variable, */
@@ -34,6 +34,13 @@ kunshan_robot(int axis_nr, int auxiliary_variable_nr,
 					std::vector<int>& m_map,
 					std::vector<teach_point>& m_teach_points,
 					std::vector<double>& m_weight);
+
+	virtual TRANS get_gun_in_seam();
+	virtual TRANS getTransWorldToWorkpiece(JAngle ex_angle);
+	virtual TRANS getTrans6ToTorch();
+	virtual TRANS getTransWorldToBase(JAngle ex_angle);
+	virtual bool InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const TRANS& t6);
+	virtual double get_jacobi_deter(JAngle& angle);
 };
 
 #endif /* _KUNSHAN_ROBOT_H_ */

@@ -413,11 +413,11 @@ public:
 		m_result = false;
 		try
 		{
-			int size = m_indQueue.size();
-			for (int i = m_index; i < size; i = i + m_thread_count)
-//			for( individual_ptr ind = m_indQueue.pop(); ind; ind = m_indQueue.pop() )
+//			int size = m_indQueue.size();
+//			for (int i = m_index; i < size; i = i + m_thread_count)
+			for( individual_ptr ind = m_indQueue.pop(); ind; ind = m_indQueue.pop() )
 			{
-				individual_ptr ind = m_indQueue[i];
+//				individual_ptr ind = m_indQueue[i];
 				m_listener->start_of( m_index, ind );
 				double result = processor_traits< T >::run( m_of, ind->vars());
 
@@ -568,10 +568,10 @@ public:
 	{
 		m_threads->join_all();
 
-		// if( !m_indQueue.empty() )
-		// 	throw processors_exception( "threads ended before emptying the queue");
+		if( !m_indQueue.empty() )
+			throw processors_exception( "threads ended before emptying the queue");
 
-		m_indQueue.clear();
+//		m_indQueue.clear();
 		if( !success() )
 			throw processors_exception( "objective function error");
 	}

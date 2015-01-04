@@ -19,49 +19,49 @@
 
 using namespace de;
 
-int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, char *path);
-int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, char *path);
+int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path);
+int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path);
 
 
 class robot_listener : public de::listener
 {
 public:
 	virtual void start()
-		{
-		}
+	{
+	}
 
 	virtual void end()
-		{
-		}
+	{
+	}
 
 	virtual void error()
-		{
-		}
+	{
+	}
 
 	virtual void startGeneration( size_t genCount )
-		{
-		}
+	{
+	}
 
 	virtual void endGeneration( size_t genCount, individual_ptr bestIndGen, individual_ptr bestInd)
-		{
-			std::cout << ( boost::format( "%1%, %2%\n" ) % genCount % bestInd->to_string()).str();
-		}
+	{
+		std::cout << ( boost::format( "%1%, %2%\n" ) % genCount % bestInd->to_string()).str();
+	}
 
 	virtual void startSelection( size_t genCount )
-		{
-		}
+	{
+	}
 
 	virtual void endSelection( size_t genCount )
-		{
-		}
+	{
+	}
 
 	virtual void startProcessors( size_t genCount )
-		{
-		}
+	{
+	}
 
 	virtual void endProcessors( size_t genCount )
-		{
-		}
+	{
+	}
 };
 
 template <typename T>
@@ -249,13 +249,29 @@ void robot_system<T>::operator()()
 	std::vector<JAngle> best_ex_angle;
 
 	int err_count = 0;
+	de::listener_ptr listener( boost::make_shared< de::null_listener >() );
+//		de::listener_ptr listener( boost::make_shared< robot_listener >() );
+	de::processor_listener_ptr processor_listener( 
+		boost::make_shared< de::null_processor_listener >() );
+	/* de::termination_strategy_ptr terminationStrategy(  */
+	/* 	boost::make_shared< de::max_gen_termination_strategy >( 300 ) ); */
+
+	de::termination_strategy_ptr terminationStrategy( 
+		boost::make_shared< de::min_devitaion_termination_strategy >( 1e-10 ) );
+
+	de::selection_strategy_ptr selectionStrategy(
+		boost::make_shared< de::tournament_selection_strategy >() );
+	de::mutation_strategy_arguments mutation_arguments( m_weight, m_crossover );
+	de::mutation_strategy_ptr mutationStrategy(
+		boost::make_shared< de::mutation_strategy_1 >( m_redundancy, mutation_arguments ) );
+
 
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
 //		cerr << "job " << m_job_id << ": ";
 //		cerr << "i = " << i << ", ";
 		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
-		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+			    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 //		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));
 			
 		de::constraints_ptr constraints( boost::make_shared< de::constraints >(m_redundancy, -1.0e6, 1.0e6));
@@ -267,24 +283,10 @@ void robot_system<T>::operator()()
 //			(*constraints)[j] = boost::make_shared<de::real_constraint>(pre_state.m_axes_values, tmp.second);
 		}
 
-		de::listener_ptr listener( boost::make_shared< de::null_listener >() );
-//		de::listener_ptr listener( boost::make_shared< robot_listener >() );
-		de::processor_listener_ptr processor_listener( 
-			boost::make_shared< de::null_processor_listener >() );
 		typename de::processors< T >::processors_ptr _processors( 
 			boost::make_shared< de::processors< T > >( 
 				m_thread_nr, boost::ref( cur_state ), processor_listener ) );
-		/* de::termination_strategy_ptr terminationStrategy(  */
-		/* 	boost::make_shared< de::max_gen_termination_strategy >( 300 ) ); */
 
-		de::termination_strategy_ptr terminationStrategy( 
-			boost::make_shared< de::min_devitaion_termination_strategy >( 1e-10 ) );
-
-		de::selection_strategy_ptr selectionStrategy(
-			boost::make_shared< de::tournament_selection_strategy >() );
-		de::mutation_strategy_arguments mutation_arguments( m_weight, m_crossover );
-		de::mutation_strategy_ptr mutationStrategy(
-			boost::make_shared< de::mutation_strategy_1 >( m_redundancy, mutation_arguments ) );
 		typename de::differential_evolution< T > de(
 			m_redundancy, m_pop_size, _processors, constraints, false, 
 			terminationStrategy, selectionStrategy, mutationStrategy, listener );
@@ -368,7 +370,7 @@ void robot_system<T>::set_de_args(int pop_size, int thread_nr, double weight, do
 	m_crossover = crossover;
 }
 
-int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, char *path)
+int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path)
 {
 	// for (int i = 1; i < angle.size(); i++) {
 	// 	to_continuous(angle[i], angle[i - 1]);
@@ -396,7 +398,7 @@ int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, char *path)
 	return 0;
 }
 
-int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, char *path)
+int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path)
 {
 	FILE *file;
 	if((file = fopen(path, "wb")) == NULL) {
