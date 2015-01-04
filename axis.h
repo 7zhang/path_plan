@@ -44,6 +44,7 @@ axis(double min, double max, double vel_max, double acc_max, double time_interva
 	std::pair<double, double> get_range() const;
 	int add_value(double value);
 	double last() const;
+	void clear() { wave.clear();}
 };
 
 #endif /* _AXIS_H_ */

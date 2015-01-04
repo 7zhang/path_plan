@@ -25,10 +25,10 @@ int main(int argc, char *argv[])
 	    p.push_back(myjob.get_p());
 	    p.push_back(myjob.get_n());
 	    p.push_back(myjob.get_t());
-	    for (int i = 0; i < 1; i++) {
+	    for (int i = 0; i < 70; i++) {
 		    job_id = c.start_new(p);
 //		    c.notifyServer();
-		    cout << i << endl;
+		    cout << "add job "<< job_id << endl;
 	    }
     }
     catch (JsonRpcException e)
@@ -36,24 +36,40 @@ int main(int argc, char *argv[])
         cerr << e.what() << endl;
     }
 
-    try {
-	    std::pair<int, int> finish_rate(0,0);
-	    while(finish_rate.second < myjob.get_size()) {
-		    finish_rate = c.get_finish_rate(job_id);
-		    if (finish_rate.first < 0) {
-			    std::cout << "job " << job_id << " size " 
-				      << -finish_rate.first << ": can't be finished, stop at "
-				      << finish_rate.second << std::endl;
-			    break;
-		    }
-		    std::cout << "job " << job_id << " size " << finish_rate.first << ": " 
-			      << finish_rate.second << " finished " << std::endl;
+    // try {
+    // 	    std::pair<int, int> finish_rate(0, 0);
+    // 	    while(finish_rate.second < myjob.get_size()) {
+    // 		    finish_rate = c.get_finish_rate(job_id);
+    // 		    if (finish_rate.first < 0) {
+    // 			    std::cout << "job " << job_id << " size " 
+    // 				      << -finish_rate.first << ": can't be finished, stop at "
+    // 				      << finish_rate.second << std::endl;
+    // 			    break;
+    // 		    }
+    // 		    std::cout << "job " << job_id << " size " << finish_rate.first << ": " 
+    // 			      << finish_rate.second << " finished " << std::endl;
 
-		    boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
-	    }
-    }
-    catch (JsonRpcException e)
-    {
-        cerr << e.what() << endl;
-    }
+    // 		    boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
+    // 	    }
+    // }
+    // catch (JsonRpcException e)
+    // {
+    //     cerr << e.what() << endl;
+    // }
+
+    // boost::this_thread::sleep( boost::posix_time::milliseconds(3000) );
+    // try {
+    // 	    int pop_size = 80;
+    // 	    double weight = 0.832432;
+    // 	    int ret = c.set_sys_parameter(job_id, "de_weight", &weight, 1);
+    // 	    if (ret == 0) {
+    // 		    std::cout << "de_pop_size changed to " << weight << std::endl;
+    // 	    } else {
+    // 		    std::cout << "can't set parameter, check parameter" << std::endl;
+    // 	    }
+    // }
+    // catch (JsonRpcException e)
+    // {
+    //     cerr << e.what() << endl;
+    // }
 }

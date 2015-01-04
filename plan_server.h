@@ -14,10 +14,16 @@ public:
 		this->bindAndAddMethod(jsonrpc::Procedure("start_new", jsonrpc::PARAMS_BY_NAME, jsonrpc::JSON_INTEGER, "para1", jsonrpc::JSON_ARRAY, "para2", jsonrpc::JSON_ARRAY, "para3", jsonrpc::JSON_ARRAY, NULL), &path_plan_server::start_new);
 		
 		this->bindAndAddMethod(jsonrpc::Procedure("get_finish_rate", jsonrpc::PARAMS_BY_NAME, jsonrpc::JSON_OBJECT,  "para1", jsonrpc::JSON_INTEGER, NULL), &path_plan_server::get_finish_rate);
+
+		this->bindAndAddMethod(jsonrpc::Procedure("set_sys_parameter_int", jsonrpc::PARAMS_BY_NAME, jsonrpc::JSON_INTEGER, "para1", jsonrpc::JSON_STRING, "para2", jsonrpc::JSON_INTEGER, "para3", jsonrpc::JSON_INTEGER, "para4", jsonrpc::JSON_INTEGER, NULL), &path_plan_server::set_sys_parameter_int);
+
+		this->bindAndAddMethod(jsonrpc::Procedure("set_sys_parameter_double", jsonrpc::PARAMS_BY_NAME, jsonrpc::JSON_INTEGER, "para1", jsonrpc::JSON_STRING, "para2", jsonrpc::JSON_REAL, "para3", jsonrpc::JSON_INTEGER, "para4", jsonrpc::JSON_INTEGER, NULL), &path_plan_server::set_sys_parameter_double);
 	}
 
 	void start_new(const Json::Value &request, Json::Value &response);
 	void get_finish_rate(const Json::Value &request, Json::Value &response);
+	void set_sys_parameter_int(const Json::Value &request, Json::Value &response);
+	void set_sys_parameter_double(const Json::Value &request, Json::Value &response);
 };
 
 #endif /* _PLAN_SERVER_H_ */

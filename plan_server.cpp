@@ -75,13 +75,103 @@ void path_plan_server<T>::get_finish_rate(const Json::Value &request, Json::Valu
 	Json::Value j = request["para1"];
 
 	int job_id = j.asInt();
-	if (job_id >= m_works.size()) {
+	if (job_id < 0 || job_id >= m_works.size()) {
 		response = -1;
 		return;
 	}
 	std::pair<int, int> ret = m_works[job_id]->get_finish_rate();
 	response["size"] = ret.first;
 	response["finished"] = ret.second;
+}
+
+template <typename T>
+void path_plan_server<T>::set_sys_parameter_int(const Json::Value &request, Json::Value &response)
+{
+	cout << "set_sys_parameter_int called" << endl;
+	cout << request.toStyledString() << endl;
+	if (! request.isObject()) {
+		response = -1;
+		return;
+	}
+
+	if (!(request.isMember("para1") && request.isMember("para2") && request.isMember("para3") && request.isMember("para4")))
+	{
+		response = -1;
+		return;
+	}
+
+	std::string para_name = request["para1"].asString();
+	Json::Value pvalue = request["para2"];
+	int restart = request["para3"].asInt();
+	int job_id = request["para4"].asInt();
+	if (job_id < 0 ||  job_id >= m_works.size()) {
+		response = -1;
+		return;
+	}
+
+	int ivalue = 0;
+	
+	int ret = 0;
+	if (para_name == "de_pop_size" || para_name == "de_thread_nr") {
+		ivalue = pvalue.asInt();
+		ret = m_works[job_id]->set_sys_parameter(para_name, &ivalue, restart);	
+	} else {
+		response = -1;
+		return;
+	}
+
+	response = ret;
+	std::cout << "job " << job_id << " parameter changed, ";
+	if (restart) {
+		std::cout << "job restarted" << std::endl;
+	} else {
+		std::cout << "job stopped" << std::endl;
+	}
+}
+
+template <typename T>
+void path_plan_server<T>::set_sys_parameter_double(const Json::Value &request, Json::Value &response)
+{
+	cout << "set_sys_parameter_double called" << endl;
+	cout << request.toStyledString() << endl;
+	if (! request.isObject()) {
+		response = -1;
+		return;
+	}
+
+	if (!(request.isMember("para1") && request.isMember("para2") && request.isMember("para3") && request.isMember("para4")))
+	{
+		response = -1;
+		return;
+	}
+
+	std::string para_name = request["para1"].asString();
+	Json::Value pvalue = request["para2"];
+	int restart = request["para3"].asInt();
+	int job_id = request["para4"].asInt();
+
+	if (job_id < 0 ||  job_id >= m_works.size()) {
+		response = -1;
+		return;
+	}
+	double dvalue = 0.0;
+	
+	int ret = 0;
+	if (para_name == "de_weight" || para_name == "de_crossover") {
+		dvalue = pvalue.asDouble();
+		ret = m_works[job_id]->set_sys_parameter(para_name, &dvalue, restart);	
+	} else {
+		response = -1;
+		return;
+	}
+
+	response = ret;
+	std::cout << "job " << job_id << " parameter changed, ";
+	if (restart) {
+		std::cout << "job restarted" << std::endl;
+	} else {
+		std::cout << "job stopped" << std::endl;
+	}
 }
 
 int main()

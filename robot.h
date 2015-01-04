@@ -168,16 +168,19 @@ robot_system(int job_id, int pop_size, int time_interval,
 		}
 	}
 
-	int set_sys_parameter(std::string para_name, void *para_value) {
+	int set_sys_parameter(std::string para_name, void *para_value, int restart) {
 		boost::unique_lock<boost::mutex> lock(m_mutex);
 		if (m_continue != 0) {
-			m_continue = 0;
+			if (restart) {
+				m_continue = -1;
+			} else {
+				m_continue = 0;
+			}
 		}
 
 		int tmp_i;
 		double tmp_d;
-		switch (para_name) {
-		case "de_pop_size":
+		if (para_name == "de_pop_size") {
 			tmp_i = *(int *)para_value;
 			if (tmp_i < 0) {
 				std::cerr << "can't set de_pop_size to " << tmp_i
@@ -187,8 +190,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 			m_pop_size = tmp_i;
 			std::cerr << "de_pop_size in job " << m_job_id
 				  << "changed to " << m_pop_size << std::endl;
-			break;
-		case "de_thread_nr":
+		} else if (para_name == "de_thread_nr") {
 			tmp_i = *(int *)para_value;
 			if (tmp_i < 0) {
 				std::cerr << "can't set de_thread_nr to " << tmp_i
@@ -198,8 +200,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 			m_thread_nr = tmp_i;
 			std::cerr << "de_thread_nr in job " << m_job_id
 				  << "changed to " << m_thread_nr << std::endl;
-			break;
-		case "de_weight":
+		} else if (para_name == "de_weight") {
 			tmp_d = *(double *)para_value;
 			if (tmp_d < 0.0 || tmp_d > 2.0) {
 				std::cerr << "can't set de_weight to " << tmp_d
@@ -210,8 +211,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 			m_weight = tmp_d;
 			std::cerr << "de_weight in job " << m_job_id
 				  << "changed to " << m_weight << std::endl;
-			break;
-		case "de_crossover":
+		} else if (para_name == "de_crossover") {
 			tmp_d = *(double *)para_value;
 			if (tmp_d < 0.0 || tmp_d > 1.0) {
 				std::cerr << "can't set de_crossover to " << tmp_d
@@ -222,7 +222,8 @@ robot_system(int job_id, int pop_size, int time_interval,
 			m_crossover = tmp_d;
 			std::cerr << "de_crossover in job " << m_job_id
 				  << "changed to " << m_crossover << std::endl;
-			break;
+		} else {
+			return -1;
 		}
 
 		return 0;
@@ -235,6 +236,8 @@ void robot_system<T>::operator()()
 //	T::init();
 	T pre_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(0), m_job.get_n(0), m_job.get_t(0),
 		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+	T pre_state_back_up(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(0), m_job.get_n(0), m_job.get_t(0),
+		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 	pre_state.m_axes_values[0] = 15.0;
 	pre_state.m_axes_values[1] = -95.0/2;
 	pre_state.m_axes_values[2] = 15.0;
@@ -244,6 +247,8 @@ void robot_system<T>::operator()()
 	pre_state.m_axes_values[6] = 45.0;
 	pre_state.m_axes_values[7] = 0.0;
 	pre_state.m_axes_values[8] = -50.0;
+
+	pre_state_back_up = pre_state;
 
 	std::vector<JAngle> best_angle;
 	std::vector<JAngle> best_ex_angle;
@@ -348,10 +353,22 @@ void robot_system<T>::operator()()
 
 		boost::unique_lock<boost::mutex> lock(m_mutex);
 		m_cond.notify_one();
-		if (! m_continue) {
+
+		m_i = i;
+
+		if (m_continue < 0) {
+			i = -1;
+			pre_state = pre_state_back_up;
+			for (int i = 0; i < m_axes.size(); i++)
+				m_axes[i].clear();
+
+			for (int i = 0; i < m_auxiliary_variable.size(); i++)
+				m_auxiliary_variable[i].clear();
+
+			continue;
+		} else if (m_continue == 0) {
 			break;
 		}
-		m_i = i;
 	}
 
 	boost::unique_lock<boost::mutex> lock(m_mutex);
