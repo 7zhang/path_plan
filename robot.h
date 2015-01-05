@@ -273,8 +273,10 @@ void robot_system<T>::operator()()
 
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
-//		cerr << "job " << m_job_id << ": ";
-//		cerr << "i = " << i << ", ";
+		cerr << "job " << m_job_id << ": ";
+		cerr << "i = " << i << ", ";
+		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
+		     << m_job.get_p(i).dz << std::endl;
 		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
 			    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 //		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));
@@ -315,7 +317,7 @@ void robot_system<T>::operator()()
 		}
 		err_count = 0;
 
-//		std::cout << cur_state.to_string() << std::endl;
+		std::cout << cur_state.to_string() << std::endl;
 
 //		cur_state.check();
 //		std::cout << "cost: ";
@@ -340,7 +342,7 @@ void robot_system<T>::operator()()
 		JAngle besta(cur_state.m_axes_values[0], cur_state.m_axes_values[1], cur_state.m_axes_values[2],
 			     cur_state.m_axes_values[3], cur_state.m_axes_values[4], cur_state.m_axes_values[5]);
 		JAngle bestea(cur_state.m_axes_values[6], cur_state.m_axes_values[7], cur_state.m_axes_values[8], 
-			      0.0, 0.0, 0.0);
+			      cur_state.m_axes_values[8], 0.0, 0.0);
 
 		best_angle.push_back(besta);
 		best_ex_angle.push_back(bestea);

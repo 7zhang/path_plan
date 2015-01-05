@@ -11,7 +11,7 @@ private:
 public:
 	job(std::string seam) {
 		if (!seam.empty()) {
-			cout << seam.c_str();
+			cerr << seam.c_str();
 			std::cerr << "load seam file: " << seam << std::endl;
 			if (load_seam(seam.c_str(), m_point, m_normal, m_tangent)) {
 				std::cerr << "load_seam error: " << seam << std::endl;

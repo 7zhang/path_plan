@@ -78,13 +78,44 @@ void kunshan_robot::init(std::string& m_sys_name,
 	m_weight.push_back(1.0);
 }
 
-TRANS kunshan_robot::get_gun_in_seam()
+TRANS kunshan_robot::get_gun_in_seam(const JAngle& weld_angle)
 {
-	return TRANS(0.0, 0.0, -1.0, 
+	TRANS gun_in_seam(0.0, 0.0, -1.0, 
 			  1.0, 0.0, 0.0, 
 			  0.0, -1.0, 0.0,
 			  0.0, 0.0, 0.0);
+
+	double pi = boost::math::constants::pi<double>();
+	TRANS rotateY(cos(weld_angle.get_angle(1) / 180.0 * pi), 0.0, -sin(weld_angle.get_angle(1) / 180.0 * pi),
+		      0.0, 1.0, 0.0,
+		      sin(weld_angle.get_angle(1) / 180.0 * pi), 0.0, cos(weld_angle.get_angle(1) / 180.0 * pi),
+		      0.0, 0.0, 0.0);
+	TRANS rotateXL(1.0, 0.0, 0.0,
+		       0.0, cos(weld_angle.get_angle(2) / 180.0 * pi), sin(weld_angle.get_angle(2) / 180.0 * pi),
+		       0.0, -sin(weld_angle.get_angle(2) / 180.0 * pi), cos(weld_angle.get_angle(2) / 180.0 * pi),
+		       0.0, 0.0, 0.0);
+
+	TRANS rotateXR(1.0, 0.0, 0.0,
+		       0.0, cos(weld_angle.get_angle(3) / 180.0 * pi), sin(weld_angle.get_angle(3) / 180.0 * pi),
+		       0.0, -sin(weld_angle.get_angle(3) / 180.0 * pi), cos(weld_angle.get_angle(3) / 180.0 * pi),
+		       0.0, 0.0, 0.0);
+
+	// TRANS rotateZ(cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi), 0.0,
+	// 	      -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi), 0.0,
+	// 	      0.0, 0.0, 1.0,
+	// 	      0.0, 0.0, 0.0);
+	gun_in_seam = rotateXL * rotateY * gun_in_seam * rotateXR;
+
+	return gun_in_seam;
 }
+
+// TRANS kunshan_robot::get_gun_in_seam()
+// {
+// 	return TRANS(0.0, 0.0, -1.0, 
+// 		     1.0, 0.0, 0.0, 
+// 		     0.0, -1.0, 0.0,
+// 		     0.0, 0.0, 0.0);
+// }
 
 TRANS kunshan_robot::getTransWorldToWorkpiece(JAngle ex_angle)
 {

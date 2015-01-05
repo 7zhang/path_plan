@@ -88,7 +88,7 @@ system_state(int axis_nr,
 //	return tmp;
 		return acos(tmp) / pi * 180.0;
 	}
-	virtual TRANS get_gun_in_seam() = 0;
+	virtual TRANS get_gun_in_seam(const JAngle& weld_angle) = 0;
 	virtual TRANS getTransWorldToWorkpiece(JAngle ex_angle) = 0;
 	virtual TRANS getTrans6ToTorch() = 0;
 	virtual TRANS getTransWorldToBase(JAngle ex_angle) = 0;
@@ -197,30 +197,31 @@ system_state(int axis_nr,
 		// m_s.in.fi = (*args)[5];
 
 		double pi = boost::math::constants::pi<double>();
-		TRANS gun_in_seam = this->get_gun_in_seam();
-		// TRANS gun_in_seam(0.0, 0.0, -1.0, 
-		// 		  1.0, 0.0, 0.0, 
-		// 		  0.0, -1.0, 0.0,
-		// 		  0.0, 0.0, 0.0);
-		TRANS rotateY(cos((*args)[3] / 180.0 * pi), 0.0, -sin((*args)[3] / 180.0 * pi),
-			      0.0, 1.0, 0.0,
-			      sin((*args)[3] / 180.0 * pi), 0.0, cos((*args)[3] / 180.0 * pi),
-			      0.0, 0.0, 0.0);
-		TRANS rotateXL(1.0, 0.0, 0.0,
-			       0.0, cos((*args)[4] / 180.0 * pi), sin((*args)[4] / 180.0 * pi),
-			       0.0, -sin((*args)[4] / 180.0 * pi), cos((*args)[4] / 180.0 * pi),
-			       0.0, 0.0, 0.0);
+		JAngle gun_angle((*args)[3], (*args)[4], (*args)[5]);
+		TRANS gun_in_seam = this->get_gun_in_seam(gun_angle);
+		/* // TRANS gun_in_seam(0.0, 0.0, -1.0,  */
+		/* // 		  1.0, 0.0, 0.0,  */
+		/* // 		  0.0, -1.0, 0.0, */
+		/* // 		  0.0, 0.0, 0.0); */
+		/* TRANS rotateY(cos((*args)[3] / 180.0 * pi), 0.0, -sin((*args)[3] / 180.0 * pi), */
+		/* 	      0.0, 1.0, 0.0, */
+		/* 	      sin((*args)[3] / 180.0 * pi), 0.0, cos((*args)[3] / 180.0 * pi), */
+		/* 	      0.0, 0.0, 0.0); */
+		/* TRANS rotateXL(1.0, 0.0, 0.0, */
+		/* 	       0.0, cos((*args)[4] / 180.0 * pi), sin((*args)[4] / 180.0 * pi), */
+		/* 	       0.0, -sin((*args)[4] / 180.0 * pi), cos((*args)[4] / 180.0 * pi), */
+		/* 	       0.0, 0.0, 0.0); */
 
-		TRANS rotateXR(1.0, 0.0, 0.0,
-			       0.0, cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi),
-			       0.0, -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi),
-			       0.0, 0.0, 0.0);
+		/* TRANS rotateXR(1.0, 0.0, 0.0, */
+		/* 	       0.0, cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi), */
+		/* 	       0.0, -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi), */
+		/* 	       0.0, 0.0, 0.0); */
 
-		// TRANS rotateZ(cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi), 0.0,
-		// 	      -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi), 0.0,
-		// 	      0.0, 0.0, 1.0,
-		// 	      0.0, 0.0, 0.0);
-		gun_in_seam = rotateXL * rotateY * gun_in_seam * rotateXR;
+		/* // TRANS rotateZ(cos((*args)[5] / 180.0 * pi), sin((*args)[5] / 180.0 * pi), 0.0, */
+		/* // 	      -sin((*args)[5] / 180.0 * pi), cos((*args)[5] / 180.0 * pi), 0.0, */
+		/* // 	      0.0, 0.0, 1.0, */
+		/* // 	      0.0, 0.0, 0.0); */
+		/* gun_in_seam = rotateXL * rotateY * gun_in_seam * rotateXR; */
 
 //	print_trans("gun_in_seam", gun_in_seam);
 	

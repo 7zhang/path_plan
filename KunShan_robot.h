@@ -35,7 +35,7 @@ kunshan_robot(int axis_nr, int auxiliary_variable_nr,
 					std::vector<teach_point>& m_teach_points,
 					std::vector<double>& m_weight);
 
-	virtual TRANS get_gun_in_seam();
+	virtual TRANS get_gun_in_seam(const JAngle& weld_angle);
 	virtual TRANS getTransWorldToWorkpiece(JAngle ex_angle);
 	virtual TRANS getTrans6ToTorch();
 	virtual TRANS getTransWorldToBase(JAngle ex_angle);
