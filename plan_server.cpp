@@ -46,7 +46,22 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 	job myjob(p, n, t);
 //	robot_system<kunshan_robot> kunshan("kunshan robot", 6, 60, 0.001, stl_path, myjob);
 	T *work = new T(m_works.size(), 60, 0.001, stl_path, myjob);
-	m_works.push_back(work);
+
+	int job_id = 0;
+	int i = 0;
+	for (; i < m_works.size(); i++) {
+		if (m_works[i] == NULL) {
+			break;
+		}
+	}
+
+	if (i == m_works.size()) {
+		m_works.push_back(work);
+		job_id = m_works.size() - 1;
+	} else {
+		m_works[i] = work;
+		job_id = i;
+	}
 
 	std::cout << work->get_sys_info();
 	std::cout << "add job " << m_works.size() - 1 << std::endl << std::endl;
@@ -55,7 +70,7 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 	boost::thread_group m_threads;
 	m_threads.add_thread( th );
 
-	response = m_works.size() - 1;
+	response = job_id;
 }
 
 template <typename T>
