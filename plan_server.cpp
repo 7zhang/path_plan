@@ -97,6 +97,13 @@ void path_plan_server<T>::get_finish_rate(const Json::Value &request, Json::Valu
 	std::pair<int, int> ret = m_works[job_id]->get_finish_rate();
 	response["size"] = ret.first;
 	response["finished"] = ret.second;
+	if (ret.first < 0) {
+		if (ret.second != -ret.first) {
+			std::cerr << "job " << job_id << " stopped" << std::endl;
+		} else {
+			std::cerr << "job " << job_id << " finished" << std::endl;
+		}
+	} 
 }
 
 template <typename T>

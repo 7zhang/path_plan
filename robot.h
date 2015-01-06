@@ -354,9 +354,8 @@ void robot_system<T>::operator()()
 //		std::cout << std::endl;
 
 		boost::unique_lock<boost::mutex> lock(m_mutex);
-		m_cond.notify_one();
-
 		m_i = i;
+		m_cond.notify_one();
 
 		if (m_continue < 0) {
 			m_continue = 1;
