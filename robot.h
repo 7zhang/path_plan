@@ -189,7 +189,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 			}
 			m_pop_size = tmp_i;
 			std::cerr << "de_pop_size in job " << m_job_id
-				  << "changed to " << m_pop_size << std::endl;
+				  << " changed to " << m_pop_size << std::endl;
 		} else if (para_name == "de_thread_nr") {
 			tmp_i = *(int *)para_value;
 			if (tmp_i < 0) {
@@ -199,7 +199,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 			}
 			m_thread_nr = tmp_i;
 			std::cerr << "de_thread_nr in job " << m_job_id
-				  << "changed to " << m_thread_nr << std::endl;
+				  << " changed to " << m_thread_nr << std::endl;
 		} else if (para_name == "de_weight") {
 			tmp_d = *(double *)para_value;
 			if (tmp_d < 0.0 || tmp_d > 2.0) {
@@ -210,7 +210,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 
 			m_weight = tmp_d;
 			std::cerr << "de_weight in job " << m_job_id
-				  << "changed to " << m_weight << std::endl;
+				  << " changed to " << m_weight << std::endl;
 		} else if (para_name == "de_crossover") {
 			tmp_d = *(double *)para_value;
 			if (tmp_d < 0.0 || tmp_d > 1.0) {
@@ -221,7 +221,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 
 			m_crossover = tmp_d;
 			std::cerr << "de_crossover in job " << m_job_id
-				  << "changed to " << m_crossover << std::endl;
+				  << " changed to " << m_crossover << std::endl;
 		} else {
 			return -1;
 		}
@@ -335,14 +335,14 @@ void robot_system<T>::operator()()
 
 //		std::cout << std::endl;
 		if (push_value(cur_state)) {
-			std::cout << "state illegal" << std::endl;
+			std::cerr << "state illegal" << std::endl;
 			break;
 		}
 
 		JAngle besta(cur_state.m_axes_values[0], cur_state.m_axes_values[1], cur_state.m_axes_values[2],
 			     cur_state.m_axes_values[3], cur_state.m_axes_values[4], cur_state.m_axes_values[5]);
 		JAngle bestea(cur_state.m_axes_values[6], cur_state.m_axes_values[7], cur_state.m_axes_values[8], 
-			      cur_state.m_axes_values[8], 0.0, 0.0);
+			      cur_state.m_axes_values[9], 0.0, 0.0);
 
 		best_angle.push_back(besta);
 		best_ex_angle.push_back(bestea);
@@ -359,6 +359,7 @@ void robot_system<T>::operator()()
 		m_i = i;
 
 		if (m_continue < 0) {
+			m_continue = 1;
 			i = -1;
 			pre_state = pre_state_back_up;
 			for (int i = 0; i < m_axes.size(); i++)
@@ -402,10 +403,11 @@ int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *pa
 	
 	fwrite("//DATASEG\n", 1, 10, file);
 	for (int i = 0; i < angle.size(); i++) {
-		fprintf(file, "JPOS: loc%d=(%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
+		fprintf(file, "JPOS: loc%d=(%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
 			i + 1, angle[i].get_angle(1), angle[i].get_angle(2), angle[i].get_angle(3),
 			angle[i].get_angle(4), angle[i].get_angle(5), angle[i].get_angle(6),
-			ex_angle[i].get_angle(1), ex_angle[i].get_angle(2), ex_angle[i].get_angle(3));
+			ex_angle[i].get_angle(1), ex_angle[i].get_angle(2), ex_angle[i].get_angle(3),
+			ex_angle[i].get_angle(4), 0.0, 0.0);
 	}
 	
 	fwrite("//PROGRAMSEG\n", 1, 13, file);

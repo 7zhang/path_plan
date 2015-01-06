@@ -1,8 +1,8 @@
 #include "KR5ARC_robot.h"
 #include "state.h"
 #include "Transform.h"
-#include "calc_criteria.h"
 #include "teach_point.h"
+#include "det6x6.h"
 
 /*
  * ten axes
@@ -223,9 +223,87 @@ bool KR5ARC_robot::InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,
 
 double KR5ARC_robot::get_jacobi_deter(JAngle& angle)
 {
-	return 1.0;
-	return calc_criteria(&angle)  / 376234706.2853961;
+	double j[6][6];
+	jacobi(j, angle.get_angle(1), angle.get_angle(2), angle.get_angle(3), 
+		angle.get_angle(4), angle.get_angle(5), angle.get_angle(6));
+		
+	return fabs(determinant(j)) / 587233000;
 }
+
+const double d1 = 675;
+const double a1 = 260;
+const double a2 = 680;
+const double a3 = 35;
+const double d4 = -670.0;
+const double RADIANPERDEGREE = 3.1415926535897932 / 180;
+
+void KR5ARC_robot::jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6)
+{
+	theta1 = theta1 * RADIANPERDEGREE;
+	theta2 = theta2 * RADIANPERDEGREE;
+	theta3 = theta3 * RADIANPERDEGREE;
+	theta4 = theta4 * RADIANPERDEGREE;
+	theta5 = theta5 * RADIANPERDEGREE;
+	theta6 = theta6 * RADIANPERDEGREE;
+
+	double s1, c1, s2, c2, s3, c3, s4, c4, s5, c5, s6, c6, s23, c23;
+	s1 = sin(theta1);
+	c1 = cos(theta1);
+	s2 = sin(theta2);
+	c2 = cos(theta2);	
+	s3 = sin(theta3);
+	c3 = cos(theta3);
+	s4 = sin(theta4);
+	c4 = cos(theta4);
+	s5 = sin(theta5);
+	c5 = cos(theta5);
+	s6 = sin(theta6);
+	c6 = cos(theta6);
+	s23 = s2 * c3 + c2 * s3;
+	c23 = c2 * c3 - s2 * s3;
+	j[0][0] = -(s1*(a1 + a2*c2 + a3*c23 - d4*s23));
+	j[0][1] = -(c1*(c23*d4 + a2*s2 + a3*s23));
+	j[0][2] = -(c1*(c23*d4 + a3*s23));
+	j[0][3] = 0.0;
+	j[0][4] = 0.0;
+	j[0][5] = 0.0;
+
+	j[1][0] = c1*(a1 + a2*c2 + a3*c23 - d4*s23);
+	j[1][1] = -(s1*(c23*d4 + a2*s2 + a3*s23));
+	j[1][2] = -(s1*(c23*d4 + a3*s23));
+	j[1][3] = 0.0;
+	j[1][4] = 0.0;
+	j[1][5] = 0.0;
+
+	j[2][0] = 0.0;
+	j[2][1] = -(a2*c2) - a3*c23 + d4*s23;
+	j[2][2] = -(a3*c23) + d4*s23;
+	j[2][3] = 0.0;
+	j[2][4] = 0.0;
+	j[2][5] = 0.0;
+
+	j[3][0] = 0.0;
+	j[3][1] = -s1;
+	j[3][2] = -s1;
+	j[3][3] = -(c1*s23);
+	j[3][4] = -(c4*s1) + c1*c23*s4;
+	j[3][5] = -(s1*s4*s5) - c1*(c5*s23 + c23*c4*s5);
+
+	j[4][0] = 0.0;
+	j[4][1] = c1;
+	j[4][2] = c1;
+	j[4][3] = -(s1*s23);
+	j[4][4] = c1*c4 + c23*s1*s4;
+	j[4][5] = -(c5*s1*s23) + (-(c23*c4*s1) + c1*s4)*s5;
+
+	j[5][0] = 1;
+	j[5][1] = 0.0;
+	j[5][2] = 0.0;
+	j[5][3] = -c23;
+	j[5][4] = -(s23*s4);
+	j[5][5] = -(c23*c5) + c4*s23*s5;
+}
+
 /***************************************************************************/
 
 /*

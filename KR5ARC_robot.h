@@ -51,6 +51,7 @@ KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	virtual TRANS getTransWorldToBase(JAngle ex_angle);
 	virtual bool InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const TRANS& t6);
 	virtual double get_jacobi_deter(JAngle& angle);	
+	void jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6);
 };
 
 #endif /* _KR5ARC_ROBOT_H_ */

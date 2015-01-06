@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	    p.push_back(myjob.get_p());
 	    p.push_back(myjob.get_n());
 	    p.push_back(myjob.get_t());
-	    for (int i = 0; i < 70; i++) {
+	    for (int i = 0; i < 1; i++) {
 		    job_id = c.start_new(p);
 //		    c.notifyServer();
 		    cout << "add job "<< job_id << endl;
@@ -57,19 +57,19 @@ int main(int argc, char *argv[])
     //     cerr << e.what() << endl;
     // }
 
-    // boost::this_thread::sleep( boost::posix_time::milliseconds(3000) );
-    // try {
-    // 	    int pop_size = 80;
-    // 	    double weight = 0.832432;
-    // 	    int ret = c.set_sys_parameter(job_id, "de_weight", &weight, 1);
-    // 	    if (ret == 0) {
-    // 		    std::cout << "de_pop_size changed to " << weight << std::endl;
-    // 	    } else {
-    // 		    std::cout << "can't set parameter, check parameter" << std::endl;
-    // 	    }
-    // }
-    // catch (JsonRpcException e)
-    // {
-    //     cerr << e.what() << endl;
-    // }
+    boost::this_thread::sleep( boost::posix_time::milliseconds(3000) );
+    try {
+    	    int pop_size = 80;
+    	    double weight = 0.832432;
+    	    int ret = c.set_sys_parameter(job_id, "de_pop_size", &pop_size, 1);
+    	    if (ret == 0) {
+    		    std::cout << "de_pop_size changed to " << pop_size << std::endl;
+    	    } else {
+    		    std::cout << "can't set parameter, check parameter" << std::endl;
+    	    }
+    }
+    catch (JsonRpcException e)
+    {
+        cerr << e.what() << endl;
+    }
 }
