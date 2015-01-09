@@ -6,7 +6,8 @@
 #include "plan_server.h"
 #include "geometric.h"
 #include "robot.h"
-#include "kunshan/kunshan_robot.h"
+//#include "kunshan/kunshan_robot.h"
+#include "kuka/kr5arc_robot.h"
 using namespace std;
 using namespace jsonrpc;
 
@@ -199,7 +200,7 @@ void path_plan_server<T>::set_sys_parameter_double(const Json::Value &request, J
 int main()
 {
 	jsonrpc::HttpServer httpserver(8383);
-	path_plan_server<robot_system<kunshan_robot> > s(httpserver);
+	path_plan_server<robot_system<KR5ARC_robot> > s(httpserver);
 	s.StartListening();
 	getc(stdin);
 	s.StopListening();

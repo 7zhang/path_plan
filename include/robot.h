@@ -334,11 +334,6 @@ void robot_system<T>::operator()()
 		/* } */
 
 //		std::cout << std::endl;
-		if (push_value(cur_state)) {
-			std::cerr << "state illegal" << std::endl;
-			break;
-		}
-
 		JAngle besta(cur_state.m_axes_values[0], cur_state.m_axes_values[1], cur_state.m_axes_values[2],
 			     cur_state.m_axes_values[3], cur_state.m_axes_values[4], cur_state.m_axes_values[5]);
 		JAngle bestea(cur_state.m_axes_values[6], cur_state.m_axes_values[7], cur_state.m_axes_values[8], 
@@ -354,6 +349,11 @@ void robot_system<T>::operator()()
 //		std::cout << std::endl;
 
 		boost::unique_lock<boost::mutex> lock(m_mutex);
+		if (push_value(cur_state)) {
+			std::cerr << "state illegal" << std::endl;
+			break;
+		}
+
 		m_i = i;
 		m_cond.notify_one();
 
