@@ -3,19 +3,23 @@
 
 #include "system_state.h"
 #include "kuka/kr5arc.h"
+#include "cd.h"
 
 class KR5ARC_robot: public system_state
 {
 	IKinematicAlg *rob;
+
+	static std::vector<volumenode *> left_node;
+	static std::vector<volumenode *> right_node;
 
 public:
 KR5ARC_robot(int axis_nr, int auxiliary_variable_nr, 
 	      const Vector3D& p, const Vector3D& n, 
 	      const Vector3D& t, const std::vector<axis>& axes, 
 	      const std::vector<axis>& auxiliary_variable, const std::vector<int>& map,
-	      const std::vector<teach_point>& teach_points, const std::vector<double>& weight)
-	: system_state(axis_nr,auxiliary_variable_nr, p, n, t,
-		       axes, auxiliary_variable, map, teach_points, weight){ rob = new KR5ARC_RKA(); }
+	     const std::vector<teach_point>& teach_points, const std::vector<double>& weight);
+	/* : system_state(axis_nr,auxiliary_variable_nr, p, n, t, */
+	/* 	       axes, auxiliary_variable, map, teach_points, weight){ rob = new KR5ARC_RKA(); } */
 //	static void init();
 	void check();
 	void print_trans(std::string name, TRANS& trans);
@@ -52,6 +56,8 @@ KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	virtual bool InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const TRANS& t6);
 	virtual double get_jacobi_deter(JAngle& angle);	
 	void jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6);
+
+	int cd(const JAngle& angle, const JAngle& ex_angle);
 };
 
 #endif /* _KR5ARC_ROBOT_H_ */

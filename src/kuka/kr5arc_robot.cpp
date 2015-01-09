@@ -12,14 +12,14 @@
  */
 
 void KR5ARC_robot::init(std::string& m_sys_name, 
-			 int& m_redundancy,
-			 int& m_axis_nr,
-			 int& m_auxiliary_variable_nr,
-			 std::vector<axis>& m_axes,
-			 std::vector<axis>& m_auxiliary_variable,
-			 std::vector<int>& m_map,
-			 std::vector<teach_point>& m_teach_points,
-			 std::vector<double>& m_weight)
+			int& m_redundancy,
+			int& m_axis_nr,
+			int& m_auxiliary_variable_nr,
+			std::vector<axis>& m_axes,
+			std::vector<axis>& m_auxiliary_variable,
+			std::vector<int>& m_map,
+			std::vector<teach_point>& m_teach_points,
+			std::vector<double>& m_weight)
 {
 	m_sys_name = "KR5ARC Robot System";	//modified
 	m_redundancy = 7;			//modified
@@ -89,7 +89,7 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 	// state pre_s;
 
 	JAngle pre_angle = JAngle(m_axes[0].last(), m_axes[1].last(), m_axes[2].last(),
-			     m_axes[3].last(), m_axes[4].last(), m_axes[5].last());
+				  m_axes[3].last(), m_axes[4].last(), m_axes[5].last());
 //	JAngle pre_ex_angle = JAngle(m_axes[6].last(), m_axes[7].last(), m_axes[8].last(),
 //				0.0, 0.0, 0.0);
 	// m_s.in.ex1 = (*args)[0];
@@ -184,7 +184,9 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 // 	print_trans("t6_to_torch1", t6_to_torch1);
 // 	print_trans("torch_in_world1", torch_in_world1);
 
-	
+	if (cd(angle, ex_angle)) {
+		return std::numeric_limits<double>::quiet_NaN();
+	}
 
 	for (int i = 0; i < 6; i++)
 		m_axes_values[i] = angle.get_angle(i + 1);
@@ -203,6 +205,108 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 	return criteria();
 }
 
+std::vector<volumenode *> KR5ARC_robot::left_node;
+std::vector<volumenode *> KR5ARC_robot::right_node;
+
+KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr, 
+			   const Vector3D& p, const Vector3D& n, 
+			   const Vector3D& t, const std::vector<axis>& axes, 
+			   const std::vector<axis>& auxiliary_variable, const std::vector<int>& map,
+			   const std::vector<teach_point>& teach_points, const std::vector<double>& weight)
+	: system_state(axis_nr,auxiliary_variable_nr, p, n, t,
+		       axes, auxiliary_variable, map, teach_points, weight)
+{
+	rob = new KR5ARC_RKA(); 
+
+	if (left_node.size() != 0) {
+		return;
+	}
+	cd_parameter cd_para;
+	cd_para.max_length = 60;
+	cd_para.max_triangle = 5;
+
+	std::vector<std::string> left_path, right_path;
+	left_path.push_back("../cd/robot_stl/kr16_lbase.STL");
+	left_path.push_back("../cd/robot_stl/kr16_larm.STL");
+	left_path.push_back("../cd/robot_stl/kr16_plate.STL");
+	left_path.push_back("../cd/robot_stl/kr16_workpiece.STL");
+
+	right_path.push_back("../cd/robot_stl/kr16_rotate.STL");
+	right_path.push_back("../cd/robot_stl/kr16_updown.STL");
+	right_path.push_back("../cd/robot_stl/kr16_1.STL");
+	right_path.push_back("../cd/robot_stl/kr16_2.STL");
+	right_path.push_back("../cd/robot_stl/kr16_3.STL");
+	right_path.push_back("../cd/robot_stl/kr16_4.STL");
+	right_path.push_back("../cd/robot_stl/kr16_5.STL");
+	right_path.push_back("../cd/robot_stl/kr16_6.STL");
+	right_path.push_back("../cd/robot_stl/kr16_7.STL");
+	right_path.push_back("../cd/robot_stl/kr16_gun.STL");
+
+	for (int i = 0; i < left_path.size(); i++) {
+		volumenode *ret = cd_init(left_path[i].c_str(), &cd_para);
+		if (ret == NULL)
+		{
+			std::cout << "cd_init error, STL: " << left_path[i] << std::endl;
+			goto error;
+		}
+		
+		left_node.push_back(ret);
+	}
+
+	for (int i = 0; i < right_path.size(); i++) {
+		volumenode *ret = cd_init(right_path[i].c_str(), &cd_para);
+		if (ret == NULL)
+		{
+			std::cout << "cd_init error, STL: " << right_path[i] << std::endl;
+			goto error;
+		}
+		
+		right_node.push_back(ret);
+	}
+
+	return;
+
+error:
+	for (int i = 0; i < left_node.size(); i++) {
+		cd_finish(left_node[i]);
+	}
+
+	for (int i = 0; i < right_node.size(); i++) {
+		cd_finish(right_node[i]);
+	}
+
+	return;
+}
+
+int KR5ARC_robot::cd(const JAngle& angle, const JAngle& ex_angle)
+{
+	KR5ARC_RKA kr5;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 10; j++) {					
+			TRANS left_trans = kr5.getTransWorldToWorkpiece(i, ex_angle);
+//			log_trans("left_trans", left_trans);
+			TRANS right_trans = kr5.get_trans_to_world(j, angle, ex_angle);
+//			log_trans("right_trans", right_trans);
+
+			vector3d v1, v2;
+			v1.x = left_trans.pos.dx;
+			v1.y = left_trans.pos.dy;
+			v1.z = left_trans.pos.dz;
+
+			v2.x = right_trans.pos.dx;
+			v2.y = right_trans.pos.dy;
+			v2.z = right_trans.pos.dz;
+
+			int result = collision_detection2(left_node[i], left_trans.rot.mem, 
+							  &v1, right_node[j], right_trans.rot.mem, &v2);
+			if (result) {
+				return result;
+			}
+		}
+	}
+
+	return 0;
+}
 void KR5ARC_robot::print_trans(std::string name, TRANS& trans) {
 	std::cout << std::endl << name << std::endl;
 	for (int i = 0; i < 3; i++) {
@@ -224,7 +328,7 @@ double KR5ARC_robot::get_jacobi_deter(JAngle& angle)
 {
 	double j[6][6];
 	jacobi(j, angle.get_angle(1), angle.get_angle(2), angle.get_angle(3), 
-		angle.get_angle(4), angle.get_angle(5), angle.get_angle(6));
+	       angle.get_angle(4), angle.get_angle(5), angle.get_angle(6));
 		
 	return fabs(determinant(j)) / 587233000;
 }

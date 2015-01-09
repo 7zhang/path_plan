@@ -58,9 +58,8 @@ typedef struct _cd_parameter
 	int max_length;
 }cd_parameter;
 
-extern "C" {
 //cd initialization
-__attribute__ ((visibility("default"))) volumenode *cd_init(char *path, cd_parameter *p);
+__attribute__ ((visibility("default"))) volumenode *cd_init(const char *path, const cd_parameter *p);
 
 /* collision detection 1*/
 /* use one transformation matrix to transform righ_node into left_node's coordinate */
@@ -75,5 +74,5 @@ __attribute__ ((visibility("default"))) int collision_detection2(volumenode *lef
 
 //finish cd, release memory
 __attribute__ ((visibility("default"))) int cd_finish(volumenode *vnode);
-}
+
 #endif /* _CD_H_ */

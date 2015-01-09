@@ -959,7 +959,7 @@ int merge_index(volumenode *vnode, stldata *model)
 	return 0;
 }
 
-volumenode *cd_init(char *path, cd_parameter *p)
+volumenode *cd_init(const char *path, const cd_parameter *p)
 {
 	stldata model;
 	volumenode *vnode;
@@ -1160,6 +1160,8 @@ int cd_finish_recur(volumenode *vnode)
 
 int cd_finish(volumenode *vnode)
 {
+	if (vnode == NULL)
+		return 0;
 	free(vnode->tarry);
 // 	free(vnode->m);
 // 	free(vnode->vector);

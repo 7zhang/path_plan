@@ -52,9 +52,9 @@ public:
 	virtual bool InverseRobotEx(vector<JAngle>& vecJointangle, const TRANS& t6);
 	virtual bool PositiveRobot(const JAngle& JA,TRANS& t6);
 	virtual illegal_joint IsLegal(const JAngle& JA);	
-	TRANS get_trans_to_base(int index, JAngle& angle);
-	TRANS get_trans_to_world(int index, JAngle& angle, JAngle& ex_angle);
-	TRANS getTransWorldToWorkpiece(int index, JAngle& ex_angle);
+	TRANS get_trans_to_base(int index, const JAngle& angle);
+	TRANS get_trans_to_world(int index, const JAngle& angle, const JAngle& ex_angle);
+	TRANS getTransWorldToWorkpiece(int index, const JAngle& ex_angle);
 
 	TRANS RotateX(double angle);
 	TRANS RotateY(double angle);	

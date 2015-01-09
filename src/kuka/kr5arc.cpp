@@ -265,7 +265,7 @@ illegal_joint KR5ARC_RKA::IsLegal(const JAngle& JA)
 	return NOJOINT;
 }
 
-TRANS KR5ARC_RKA::get_trans_to_base(int index, JAngle& angle)
+TRANS KR5ARC_RKA::get_trans_to_base(int index, const JAngle& angle)
 {
 	TRANS tmp;
 	for (int i = 0; i <= index; i++) {
@@ -303,7 +303,7 @@ TRANS KR5ARC_RKA::Trans(double x, double y, double z)
 	return res;
 }
 
-TRANS KR5ARC_RKA::get_trans_to_world(int index, JAngle& angle, JAngle& ex_angle)
+TRANS KR5ARC_RKA::get_trans_to_world(int index, const JAngle& angle, const JAngle& ex_angle)
 {
 	assert(index >= 0 && index < 10);
 	TRANS C0=Trans(0, -675.0, 0)*RotateZ(-90)*RotateX(90); 
@@ -324,7 +324,7 @@ TRANS KR5ARC_RKA::get_trans_to_world(int index, JAngle& angle, JAngle& ex_angle)
 	}
 }
 
-TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int index, JAngle& ex_angle)
+TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int index, const JAngle& ex_angle)
 {
 	assert(index < 4);
 	double ext1 = ex_angle.angle[0];
