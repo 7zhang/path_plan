@@ -1,1 +1,0 @@
-SharedLibrary('cd.so', ['cd.cpp', 'loadstl.cpp', 'triangle_cd.cpp'], LINKFLAGS = '-O2 -fvisibility=hidden')

@@ -1,11 +1,9 @@
-Program('path_plan', ['axis.cpp', 'exp_criteria.cpp', 'function.cpp', 'geometric.cpp', 'KunShan_robot.cpp', 'det6x6.cpp',
-'load_seam.cpp', 'robotdata.cpp', 'robotkinematic.cpp', 'sine_criteria.cpp','teach_point.cpp', 'test.cpp', 'Transform.cpp'],LIBS = ['boost_program_options', 'pthread', 'boost_system', 'boost_thread'],CCFLAGS = '-O2 -std=c++11')
-Program('server', ['plan_server.cpp', 'geometric.cpp', 'axis.cpp', 'exp_criteria.cpp', 'function.cpp', 'det6x6.cpp', 'KunShan_robot.cpp', 'load_seam.cpp', 'robotdata.cpp', 'robotkinematic.cpp', 'sine_criteria.cpp','teach_point.cpp', 'Transform.cpp'], LIBS = ['jsoncpp', 'jsonrpccpp-common', 'jsonrpccpp-server', 'microhttpd', 'boost_program_options', 'pthread', 'boost_system', 'boost_thread'], CCFLAGS = '-O2 -std=c++11')
-Program('client', ['client.cpp', 'load_seam.cpp', 'geometric.cpp'], LIBS = ['jsoncpp', 'jsonrpccpp-common', 'jsonrpccpp-client', 'boost_program_options', 'pthread', 'boost_system', 'boost_thread'], 
-		  CCFLAGS = '-O2 -std=c++11')
+SharedLibrary('bin/cd.so', ['cd/cd.cpp', 'cd/loadstl.cpp', 'cd/triangle_cd.cpp'], LINKFLAGS = '-O2 -fvisibility=hidden')
 
-Program('kr5', ['axis.cpp', 'exp_criteria.cpp', 'det6x6.cpp', 'function.cpp', 'geometric.cpp', 
-		     'load_seam.cpp', 'robotdata.cpp', 'robotkinematic.cpp', 'sine_criteria.cpp',
-		     'teach_point.cpp', 'KR5ARC.cpp', 'KR5ARC_robot.cpp','test_kr5.cpp', 'Transform.cpp'],
-		     LIBS = ['boost_program_options', 'pthread', 'boost_system', 'boost_thread'],
-		     CCFLAGS = '-O2 -std=c++11')
+Program('bin/path_plan', ['src/common/axis.cpp', 'src/common/exp_criteria.cpp', 'src/common/function.cpp', 'src/common/geometric.cpp', 'src/kunshan/kunshan_robot.cpp', 'src/common/det6x6.cpp','src/common/load_seam.cpp', 'src/common/robotdata.cpp', 'src/common/robotkinematic.cpp', 'src/common/sine_criteria.cpp','src/common/teach_point.cpp', 'test/test.cpp', 'src/kunshan/Transform.cpp'],LIBS = ['boost_program_options', 'pthread', 'boost_system', 'boost_thread'],CCFLAGS = '-Iinclude -O2 -std=c++11')
+
+Program('bin/server', ['src/plan_server.cpp', 'src/common/geometric.cpp', 'src/common/axis.cpp', 'src/common/exp_criteria.cpp', 'src/common/function.cpp', 'src/common/det6x6.cpp', 'src/kunshan/kunshan_robot.cpp', 'src/common/load_seam.cpp', 'src/common/robotdata.cpp', 'src/common/robotkinematic.cpp', 'src/common/sine_criteria.cpp','src/common/teach_point.cpp', 'src/kunshan/Transform.cpp'], LIBS = ['jsoncpp', 'jsonrpccpp-common', 'jsonrpccpp-server', 'microhttpd', 'boost_program_options', 'pthread', 'boost_system', 'boost_thread'], CCFLAGS = '-Iinclude -O2 -std=c++11')
+
+Program('bin/client', ['src/client.cpp', 'src/common/load_seam.cpp', 'src/common/geometric.cpp'], LIBS = ['jsoncpp', 'jsonrpccpp-common', 'jsonrpccpp-client', 'boost_program_options', 'pthread', 'boost_system', 'boost_thread'],  CCFLAGS = '-Iinclude -O2 -std=c++11')
+
+Program('bin/kr5', ['src/common/axis.cpp', 'src/common/exp_criteria.cpp', 'src/common/det6x6.cpp', 'src/common/function.cpp', 'src/common/geometric.cpp', 'src/common/load_seam.cpp', 'src/common/robotdata.cpp', 'src/common/robotkinematic.cpp', 'src/common/sine_criteria.cpp', 'src/common/teach_point.cpp', 'src/kuka/kr5arc.cpp', 'src/kuka/kr5arc_robot.cpp','test/test_kr5.cpp', 'src/kunshan/Transform.cpp'], LIBS = ['boost_program_options', 'pthread', 'boost_system', 'boost_thread'], CCFLAGS = '-Iinclude -O2 -std=c++11')
