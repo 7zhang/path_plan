@@ -209,6 +209,7 @@ system_state(int axis_nr,
 	}
 
 	double operator() (de::DVectorPtr args) {
+		std::cout << "this is embarrassing" << std::endl;
 		for (int i = 0; i < (*args).size(); i++) {
 			set_vars(i, (*args)[i]);
 		}

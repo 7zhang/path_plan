@@ -116,6 +116,7 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 			   axis_y.dx, axis_y.dy, axis_y.dz,
 			   m_n.dx, m_n.dy, m_n.dz,
 			   m_p.dx, m_p.dy, m_p.dz);
+//	print_trans("seam_in_part", seam_in_part);
 	TRANS gun_in_part = seam_in_part * gun_in_seam;
 
 //	print_trans("gun_in_part", gun_in_part);
@@ -140,13 +141,16 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 					
 	TRANS t6_to_torch;
 	t6_to_torch = this->getTrans6ToTorch();
+//	print_trans("t6_to_torch", t6_to_torch);
 	t6_to_torch.inverse();
 				
 	TRANS t6_in_world;
 	t6_in_world = torch_in_world * t6_to_torch;
+//	print_trans("t6_in_world", t6_in_world);
 			
 	TRANS w_to_base;
 	w_to_base = this->getTransWorldToBase(ex_angle);
+//	print_trans("w_to_base", w_to_base);
 	w_to_base.inverse();
 			
 	TRANS t6_in_robot;
@@ -168,20 +172,24 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 
 	// TRANS t6_in_robot1 = t01 * t02 * t03 * t04 * t05 * t06;
 
+//	std::cout << "angle" << std::endl;
+//	for (int i = 0; i < 6; i++) {
+//		std::cout << angle.get_angle(i + 1) << std::endl;	
+//	}	
 // 	TRANS t6_in_robot1;
 // 	rob->PositiveRobot(angle, t6_in_robot1);
-
+//
 // 	print_trans("t6_in_robot1", t6_in_robot1);
-
-// 	//TRANS t6;
-// 	//rob->PositiveRobot(angle, t6);
-
-// //	print_trans("t6", t6);
-
+//
+// 	TRANS t6;
+// 	rob->PositiveRobot(angle, t6);
+//
+//	print_trans("t6", t6);
+//
 // 	TRANS world_to_base1 = this->getTransWorldToBase(ex_angle);
 // 	TRANS t6_to_torch1 = this->getTrans6ToTorch();
 // 	TRANS torch_in_world1 = world_to_base1 * t6_in_robot1 * t6_to_torch1;
-
+//
 // 	print_trans("world_to_base1", world_to_base1);
 // 	print_trans("t6_to_torch1", t6_to_torch1);
 // 	print_trans("torch_in_world1", torch_in_world1);

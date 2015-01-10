@@ -17,6 +17,13 @@ public:
 				std::cerr << "load_seam error: " << seam << std::endl;
 			}
 
+			for (int i = 0; i < m_normal.size(); i++) {
+				m_normal[i].unitize();
+			}
+
+			for (int i = 0; i < m_tangent.size(); i++) {
+				m_tangent[i].unitize();
+			}
 			m_size = m_normal.size();
 		} else {
 			m_size = 0;
@@ -25,6 +32,13 @@ public:
 
 	job(std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) :
 	m_point(p), m_normal(n), m_tangent(t) {
+			for (int i = 0; i < m_normal.size(); i++) {
+				m_normal[i].unitize();
+			}
+
+			for (int i = 0; i < m_tangent.size(); i++) {
+				m_tangent[i].unitize();
+			}
 		m_size = p.size();
 	}
 	

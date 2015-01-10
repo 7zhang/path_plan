@@ -122,7 +122,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 	}
 
 	void optimize_init() {
-		m_thread_nr = 4;
+		m_thread_nr = 1;
 		m_weight = 0.4;
 		m_crossover = 0.9;
 	}
