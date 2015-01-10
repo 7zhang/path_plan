@@ -109,7 +109,7 @@ system_state(int axis_nr,
 		}
 	}
 
-	const system_state& operator=(const system_state& rhs) {
+	system_state& operator=(const system_state& rhs) {
 		m_axes_values = rhs.m_axes_values;
 		m_auxiliary_variable_values = rhs.m_auxiliary_variable_values;
 		m_sub_cri_axis = rhs.m_sub_cri_axis;
@@ -117,6 +117,16 @@ system_state(int axis_nr,
 		m_sub_cri_teach = rhs.m_sub_cri_teach;
 		m_cri = rhs.m_cri;
 	}
+
+	/* system_state(const system_state& rhs): m_axis_nr(rhs.m_axis_nr), m_auxiliary_variable_nr(rhs.m_auxiliary_variable_nr), m_p(rhs.m_p), m_n(rhs.m_n), m_t(rhs.m_t), m_axes(rhs.m_axes), m_auxiliary_variable(rhs.m_auxiliary_variable), m_map(rhs.m_map), m_teach_points(rhs.m_teach_points), m_weight(rhs.m_weight) { */
+	/* 	m_axes_values = rhs.m_axes_values; */
+	/* 	m_auxiliary_variable_values = rhs.m_auxiliary_variable_values; */
+	/* 	m_sub_cri_axis = rhs.m_sub_cri_axis; */
+	/* 	m_sub_cri_aux = rhs.m_sub_cri_aux; */
+	/* 	m_sub_cri_teach = rhs.m_sub_cri_teach; */
+	/* 	m_cri = rhs.m_cri; */
+	/* } */
+
 	double get_var_value(int i) {
 		assert(i < m_map.size());
 		i = m_map[i];
@@ -160,6 +170,24 @@ system_state(int axis_nr,
 		{
 			os.width(10);
 			os << m_auxiliary_variable_values[i] << " ";
+		}
+
+		for (int i = 0; i < m_sub_cri_axis.size(); i++)
+		{
+			os.width(10);
+			os << m_sub_cri_axis[i] << " ";
+		}
+
+		for (int i = 0; i < m_sub_cri_aux.size(); i++)
+		{
+			os.width(10);
+			os << m_sub_cri_aux[i] << " ";
+		}
+
+		for (int i = 0; i < m_sub_cri_teach.size(); i++)
+		{
+			os.width(10);
+			os << m_sub_cri_teach[i] << " ";
 		}
 
 		return os.str();

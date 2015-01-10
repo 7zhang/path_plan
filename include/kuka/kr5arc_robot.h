@@ -18,6 +18,7 @@ KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	      const Vector3D& t, const std::vector<axis>& axes, 
 	      const std::vector<axis>& auxiliary_variable, const std::vector<int>& map,
 	     const std::vector<teach_point>& teach_points, const std::vector<double>& weight);
+
 	/* : system_state(axis_nr,auxiliary_variable_nr, p, n, t, */
 	/* 	       axes, auxiliary_variable, map, teach_points, weight){ rob = new KR5ARC_RKA(); } */
 //	static void init();
@@ -58,6 +59,7 @@ KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	void jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6);
 
 	int cd(const JAngle& angle, const JAngle& ex_angle);
+	static void cd_initialize();
 };
 
 #endif /* _KR5ARC_ROBOT_H_ */

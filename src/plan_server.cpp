@@ -46,7 +46,7 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 	std::vector<std::string> stl_path;
 	job myjob(p, n, t);
 //	robot_system<kunshan_robot> kunshan("kunshan robot", 6, 60, 0.001, stl_path, myjob);
-	T *work = new T(m_works.size(), 60, 0.001, stl_path, myjob);
+	robot_system<T> *work = new robot_system<T>(m_works.size(), 60, 0.001, stl_path, myjob);
 
 	int job_id = 0;
 	int i = 0;
@@ -95,9 +95,66 @@ void path_plan_server<T>::get_finish_rate(const Json::Value &request, Json::Valu
 		response = -1;
 		return;
 	}
-	std::pair<int, int> ret = m_works[job_id]->get_finish_rate();
+
+	if (! request.isMember("para2"))
+	{
+		response = -1;
+		return;
+	}
+	Json::Value index = request["para2"];
+	int k = index.asInt();
+
+	std::vector<double> m_axes_values;
+	std::vector<double> m_auxiliary_variable_values;
+	std::vector<double> m_sub_cri_axis;
+	std::vector<double> m_sub_cri_aux;
+	std::vector<double> m_sub_cri_teach;
+	double m_cri;
+
+	std::pair<int, int> ret = m_works[job_id]->get_finish_rate(k, m_axes_values, 
+								   m_auxiliary_variable_values,
+								   m_sub_cri_axis,
+								   m_sub_cri_aux,
+								   m_sub_cri_teach,
+								   m_cri);
+
 	response["size"] = ret.first;
 	response["finished"] = ret.second;
+
+	Json::Value axes_values;
+	for (int i = 0; i < m_axes_values.size(); i++) {
+		axes_values.append(m_axes_values[i]);
+	}
+	response["axes"] = axes_values;
+	
+	Json::Value auxiliary_variable_values;
+	for (int i = 0; i < m_auxiliary_variable_values.size(); i++) {
+		auxiliary_variable_values.append(m_auxiliary_variable_values[i]);
+	}
+	response["auxiliary"] = auxiliary_variable_values;
+
+	Json::Value sub_cri_axis;
+	for (int i = 0; i < m_sub_cri_axis.size(); i++) {
+		sub_cri_axis.append(m_sub_cri_axis[i]);
+	}
+	response["cri_axis"] = sub_cri_axis;
+
+	Json::Value sub_cri_aux;
+	for (int i = 0; i < m_sub_cri_aux.size(); i++) {
+		sub_cri_aux.append(m_sub_cri_aux[i]);
+	}
+	response["cri_aux"] = sub_cri_aux;
+
+	Json::Value sub_cri_teach;
+	for (int i = 0; i < m_sub_cri_teach.size(); i++) {
+		sub_cri_teach.append(m_sub_cri_teach[i]);
+	}
+	response["cri_teach"] = sub_cri_teach;
+
+	Json::Value cri;
+	cri = m_cri;
+	response["cri"] = cri;
+
 	if (ret.first < 0) {
 		if (ret.second != -ret.first) {
 			std::cerr << "job " << job_id << " stopped" << std::endl;
@@ -200,7 +257,7 @@ void path_plan_server<T>::set_sys_parameter_double(const Json::Value &request, J
 int main()
 {
 	jsonrpc::HttpServer httpserver(8383);
-	path_plan_server<robot_system<KR5ARC_robot> > s(httpserver);
+	path_plan_server<KR5ARC_robot > s(httpserver);
 	s.StartListening();
 	getc(stdin);
 	s.StopListening();

@@ -70,7 +70,7 @@ class robot_system
 private:
 //      lock m_continue and m_i	
 	boost::mutex m_mutex;
-	boost::condition_variable m_cond;
+//	boost::condition_variable m_cond;
 	int m_continue;
 	int m_i;
 
@@ -153,13 +153,31 @@ robot_system(int job_id, int pop_size, int time_interval,
 		return ss.str();
 	}
 
-	std::pair<int, int> get_finish_rate() {
+	std::pair<int, int> get_finish_rate(int index, std::vector<double>& axes_values, 
+					    std::vector<double>& auxiliary_variable_values,
+					    std::vector<double>& sub_cri_axis,
+					    std::vector<double>& sub_cri_aux,
+					    std::vector<double>& sub_cri_teach,
+					    double& cri) {
 		boost::unique_lock<boost::mutex> lock(m_mutex);
 //		cout << "m_continue: " << m_continue << endl;
-		if (m_continue != 0) {
-			m_cond.wait(lock);
-		}
+		/* if (m_continue != 0) { */
+		/* 	m_cond.wait(lock); */
+		/* } */
 		int size = m_job.get_size();
+		if (index < 0)
+			index = m_i;
+
+		if (index <= m_i && index >= 0) {
+			/* std::cout << "m_states size: " << m_states.size() << std::endl; */
+			/* std::cout << "m_i: " << m_i << std::endl; */
+			axes_values = m_states[index].m_axes_values;
+			auxiliary_variable_values = m_states[index].m_auxiliary_variable_values;
+			sub_cri_axis = m_states[index].m_sub_cri_axis;
+			sub_cri_aux = m_states[index].m_sub_cri_aux;
+			sub_cri_teach = m_states[index].m_sub_cri_teach;
+			cri = m_states[index].m_cri;
+		}
 
 		if (m_continue == 0 && m_i < size - 1) {
 			return make_pair(-size, m_i + 1);
@@ -345,7 +363,6 @@ void robot_system<T>::operator()()
 		/* i--; */
 		/* continue; */
 
-		pre_state = cur_state;
 //		std::cout << std::endl;
 
 		boost::unique_lock<boost::mutex> lock(m_mutex);
@@ -354,8 +371,12 @@ void robot_system<T>::operator()()
 			break;
 		}
 
+		m_states.push_back(cur_state);
+		pre_state = cur_state;
+
 		m_i = i;
-		m_cond.notify_one();
+//		std::cout << m_states[m_i].to_string() << std::endl;		
+//		m_cond.notify_one();
 
 		if (m_continue < 0) {
 			m_continue = 1;
@@ -375,7 +396,7 @@ void robot_system<T>::operator()()
 
 	boost::unique_lock<boost::mutex> lock(m_mutex);
 	m_continue = 0;
-	m_cond.notify_one();
+//	m_cond.notify_one();
 
 	program_jpos(best_angle, best_ex_angle, "./program.glp");
 }

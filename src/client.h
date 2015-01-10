@@ -11,8 +11,51 @@ using namespace std;
 
 class path_plan_client : public jsonrpc::Client
 {
-    public:
-        path_plan_client(jsonrpc::IClientConnector &conn, jsonrpc::clientVersion_t type = jsonrpc::JSONRPC_CLIENT_V2) : jsonrpc::Client(conn, type) {}
+public:
+	class sys_state {
+	public:
+		std::vector<double> m_axes_values;
+		std::vector<double> m_auxiliary_variable_values;
+		std::vector<double> m_sub_cri_axis;
+		std::vector<double> m_sub_cri_aux;
+		std::vector<double> m_sub_cri_teach;
+		double m_cri;
+		std::string to_string() {
+			std::ostringstream os;
+
+			os << std::endl << "axes: ";
+			for (int i = 0; i < m_axes_values.size(); i++) {
+				os << m_axes_values[i] << " ";
+			}
+
+			os << std::endl << "auxiliary: ";
+			for (int i = 0; i < m_auxiliary_variable_values.size(); i++) {
+				os << m_auxiliary_variable_values[i] << " ";
+			}
+
+			os << std::endl << "cri_axis: ";
+			for (int i = 0; i < m_sub_cri_axis.size(); i++) {
+				os << m_sub_cri_axis[i] << " ";
+			}
+
+			os << std::endl << "cri_aux: ";
+			for (int i = 0; i < m_sub_cri_aux.size(); i++) {
+				os << m_sub_cri_aux[i] << " ";
+			}
+
+			os << std::endl << "cri_teach: ";
+			for (int i = 0; i < m_sub_cri_teach.size(); i++) {
+				os << m_sub_cri_teach[i] << " ";
+			}
+
+			os << std::endl << "cri: ";
+			os << m_cri;
+
+			return os.str();
+		}
+	};
+
+path_plan_client(jsonrpc::IClientConnector &conn, jsonrpc::clientVersion_t type = jsonrpc::JSONRPC_CLIENT_V2) : jsonrpc::Client(conn, type) {}
 
         int start_new(std::vector<std::vector<Vector3D> >& para) throw (jsonrpc::JsonRpcException)
         {
@@ -56,16 +99,39 @@ class path_plan_client : public jsonrpc::Client
 		this->CallNotification("notifyServer",p);
         }
 
-	std::pair<int, int> get_finish_rate(int job_id) throw (jsonrpc::JsonRpcException)
+	std::pair<int, int> get_finish_rate(int job_id, int index, sys_state& state) throw (jsonrpc::JsonRpcException)
         {
 		Json::Value p;
 		p["para1"] = job_id;
+		p["para2"] = index;
 		Json::Value result = this->CallMethod("get_finish_rate", p);
 //		cout << result.toStyledString() << endl;
 
 		if (result.isObject()) {
 			int size = result["size"].asInt();
 			int finished = result["finished"].asInt();
+			Json::Value axes = result["axes"];
+			for (int i = 0; i < axes.size(); i++) {
+				state.m_axes_values.push_back(axes[i].asDouble());
+			}
+			Json::Value auxiliary = result["auxiliary"];
+			for (int i = 0; i < auxiliary.size(); i++) {
+				state.m_auxiliary_variable_values.push_back(auxiliary[i].asDouble());
+			}
+			Json::Value cri_axis = result["cri_axis"];
+			for (int i = 0; i < cri_axis.size(); i++) {
+				state.m_sub_cri_axis.push_back(cri_axis[i].asDouble());
+			}
+			Json::Value cri_aux = result["cri_aux"];
+			for (int i = 0; i < cri_aux.size(); i++) {
+				state.m_sub_cri_aux.push_back(cri_aux[i].asDouble());
+			}
+			Json::Value cri_teach = result["cri_teach"];
+			for (int i = 0; i < cri_teach.size(); i++) {
+				state.m_sub_cri_teach.push_back(cri_teach[i].asDouble());
+			}
+			Json::Value cri = result["cri"];
+			state.m_cri = cri.asDouble();
 			return make_pair(size, finished);
 		} else {
 			throw jsonrpc::JsonRpcException(jsonrpc::Errors::ERROR_CLIENT_INVALID_RESPONSE,

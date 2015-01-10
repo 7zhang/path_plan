@@ -79,6 +79,8 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	teach_point t1(mu_axis, sigma_axis, offset_axis, weight_axis, mu_axis, sigma_axis, offset_axis, weight_axis);
 	m_teach_points.push_back(t1);
 	m_weight.push_back(1.0);
+
+	cd_initialize();
 }
 /***************************************************************************/
 double KR5ARC_robot::operator() (de::DVectorPtr args) {
@@ -184,9 +186,9 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 // 	print_trans("t6_to_torch1", t6_to_torch1);
 // 	print_trans("torch_in_world1", torch_in_world1);
 
-	if (cd(angle, ex_angle)) {
-		return std::numeric_limits<double>::quiet_NaN();
-	}
+	// if (cd(angle, ex_angle)) {
+	// 	return std::numeric_limits<double>::quiet_NaN();
+	// }
 
 	for (int i = 0; i < 6; i++)
 		m_axes_values[i] = angle.get_angle(i + 1);
@@ -218,6 +220,11 @@ KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 {
 	rob = new KR5ARC_RKA(); 
 
+
+}
+
+void KR5ARC_robot::cd_initialize()
+{
 	if (left_node.size() != 0) {
 		return;
 	}
@@ -226,21 +233,21 @@ KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	cd_para.max_triangle = 5;
 
 	std::vector<std::string> left_path, right_path;
-	left_path.push_back("../cd/robot_stl/kr16_lbase.STL");
-	left_path.push_back("../cd/robot_stl/kr16_larm.STL");
-	left_path.push_back("../cd/robot_stl/kr16_plate.STL");
-	left_path.push_back("../cd/robot_stl/kr16_workpiece.STL");
+	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_lbase.STL");
+	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_larm.STL");
+	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_plate.STL");
+	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_workpiece.STL");
 
-	right_path.push_back("../cd/robot_stl/kr16_rotate.STL");
-	right_path.push_back("../cd/robot_stl/kr16_updown.STL");
-	right_path.push_back("../cd/robot_stl/kr16_1.STL");
-	right_path.push_back("../cd/robot_stl/kr16_2.STL");
-	right_path.push_back("../cd/robot_stl/kr16_3.STL");
-	right_path.push_back("../cd/robot_stl/kr16_4.STL");
-	right_path.push_back("../cd/robot_stl/kr16_5.STL");
-	right_path.push_back("../cd/robot_stl/kr16_6.STL");
-	right_path.push_back("../cd/robot_stl/kr16_7.STL");
-	right_path.push_back("../cd/robot_stl/kr16_gun.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_rotate.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_updown.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_1.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_2.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_3.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_4.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_5.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_6.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_7.STL");
+	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_gun.STL");
 
 	for (int i = 0; i < left_path.size(); i++) {
 		volumenode *ret = cd_init(left_path[i].c_str(), &cd_para);
@@ -281,8 +288,8 @@ error:
 int KR5ARC_robot::cd(const JAngle& angle, const JAngle& ex_angle)
 {
 	KR5ARC_RKA kr5;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 10; j++) {					
+	for (int i = 0; i < left_node.size(); i++) {
+		for (int j = 0; j < right_node.size(); j++) {					
 			TRANS left_trans = kr5.getTransWorldToWorkpiece(i, ex_angle);
 //			log_trans("left_trans", left_trans);
 			TRANS right_trans = kr5.get_trans_to_world(j, angle, ex_angle);
