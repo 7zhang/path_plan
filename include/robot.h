@@ -289,6 +289,8 @@ void robot_system<T>::operator()()
 		boost::make_shared< de::mutation_strategy_1 >( m_redundancy, mutation_arguments ) );
 
 	int cd_detect = 0;
+	std::vector<T> try_vector;
+	int try_times = 0;
 
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
@@ -324,11 +326,33 @@ void robot_system<T>::operator()()
 		std::cerr << best->cost() << endl;
 
 		double cost = cur_state(best->vars());
+
 		if (cur_state.cd()) {
 			std::cerr << "triggered" << std::endl;
 			cd_detect = 1;
 			i--;
 			continue;
+		}
+
+		if (try_times >= 0 && try_times < 20) {
+			try_vector.push_back(cur_state);
+			try_times++;
+			i--;
+			continue;
+		} else if (try_times == 20) {
+			try_times = -1;
+			int best_index = 0;
+			double best_cost = 0.0;
+			for (int i = 0; i < try_vector.size(); i++) {
+				if (best_cost < try_vector[i].m_cri) {
+					best_cost = try_vector[i].m_cri;
+					best_index = i;
+				}
+			}
+
+			try_vector.clear();
+			std::cerr << "best start point index: " << best_index << std::endl;
+			cur_state = try_vector[best_index];
 		}
 
 		cd_detect = 0;
