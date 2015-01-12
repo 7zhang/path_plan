@@ -326,6 +326,7 @@ void robot_system<T>::operator()()
 		std::cerr << best->cost() << endl;
 
 		double cost = cur_state(best->vars());
+//		std::cout << cur_state.to_string() << std::endl;
 
 		if (cur_state.cd()) {
 			std::cerr << "triggered" << std::endl;
@@ -350,9 +351,10 @@ void robot_system<T>::operator()()
 				}
 			}
 
-			try_vector.clear();
 			std::cerr << "best start point index: " << best_index << std::endl;
 			cur_state = try_vector[best_index];
+			try_vector.clear();
+	
 		}
 
 		cd_detect = 0;
