@@ -288,6 +288,7 @@ void robot_system<T>::operator()()
 	de::mutation_strategy_ptr mutationStrategy(
 		boost::make_shared< de::mutation_strategy_1 >( m_redundancy, mutation_arguments ) );
 
+	int cd_detect = 0;
 
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
@@ -297,6 +298,7 @@ void robot_system<T>::operator()()
 		     << m_job.get_p(i).dz << std::endl;
 		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
 			    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+		cur_state.cd_detect = cd_detect;
 //		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));
 			
 		de::constraints_ptr constraints( boost::make_shared< de::constraints >(m_redundancy, -1.0e6, 1.0e6));
@@ -322,6 +324,14 @@ void robot_system<T>::operator()()
 		std::cerr << best->cost() << endl;
 
 		double cost = cur_state(best->vars());
+		if (cur_state.cd()) {
+			std::cerr << "triggered" << std::endl;
+			cd_detect = 1;
+			i--;
+			continue;
+		}
+
+		cd_detect = 0;
 		double diff = cur_state.dist(pre_state);
 
 		if (i > 0 && diff > 200 && err_count < 100) {

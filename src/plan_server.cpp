@@ -46,6 +46,7 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 	std::vector<std::string> stl_path;
 	job myjob(p, n, t);
 //	robot_system<kunshan_robot> kunshan("kunshan robot", 6, 60, 0.001, stl_path, myjob);
+
 	robot_system<T> *work = new robot_system<T>(m_works.size(), 60, 0.001, stl_path, myjob);
 
 	int job_id = 0;
@@ -257,8 +258,10 @@ void path_plan_server<T>::set_sys_parameter_double(const Json::Value &request, J
 int main()
 {
 	jsonrpc::HttpServer httpserver(8383);
+	KR5ARC_robot::cd_initialize();
 	path_plan_server<KR5ARC_robot > s(httpserver);
 	s.StartListening();
+	std::cout << "server started" << std::endl;
 	getc(stdin);
 	s.StopListening();
 	return 0;

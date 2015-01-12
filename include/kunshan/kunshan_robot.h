@@ -42,6 +42,7 @@ kunshan_robot(int axis_nr, int auxiliary_variable_nr,
 	virtual bool InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const TRANS& t6);
 	virtual double get_jacobi_deter(JAngle& angle);
 	void jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6);
+	int cd() { return 0;}
 };
 
 #endif /* _KUNSHAN_ROBOT_H_ */

@@ -194,10 +194,6 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 // 	print_trans("t6_to_torch1", t6_to_torch1);
 // 	print_trans("torch_in_world1", torch_in_world1);
 
-	// if (cd(angle, ex_angle)) {
-	// 	return std::numeric_limits<double>::quiet_NaN();
-	// }
-
 	for (int i = 0; i < 6; i++)
 		m_axes_values[i] = angle.get_angle(i + 1);
 	
@@ -205,7 +201,9 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 	// to_continuous(s->ex_angle, pre_s->ex_angle);
 //	delete rob;
 
-
+	if (cd_detect && cd()) {
+		return std::numeric_limits<double>::quiet_NaN();
+	}
 	
 	m_auxiliary_variable_values[3] = get_jacobi_deter(angle);
 //calc_criteria(&angle)  / 376234706.2853961;
@@ -293,8 +291,11 @@ error:
 	return;
 }
 
-int KR5ARC_robot::cd(const JAngle& angle, const JAngle& ex_angle)
+int KR5ARC_robot::cd()
 {
+	JAngle angle(m_axes_values[0], m_axes_values[1], m_axes_values[2],
+				  m_axes_values[3], m_axes_values[4], m_axes_values[5]);
+	JAngle ex_angle(m_axes_values[6], m_axes_values[7], m_axes_values[8], m_axes_values[9], 0.0, 0.0);
 	KR5ARC_RKA kr5;
 	for (int i = 0; i < left_node.size(); i++) {
 		for (int j = 0; j < right_node.size(); j++) {					

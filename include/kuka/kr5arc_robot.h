@@ -58,7 +58,7 @@ KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	virtual double get_jacobi_deter(JAngle& angle);	
 	void jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6);
 
-	int cd(const JAngle& angle, const JAngle& ex_angle);
+	int cd();
 	static void cd_initialize();
 };
 

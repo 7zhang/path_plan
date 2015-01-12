@@ -19,6 +19,7 @@
 class system_state
 {
 public:
+	int cd_detect;
 	const int m_axis_nr;
 	const int m_auxiliary_variable_nr;
 //	int m_sub_cri_nr;
@@ -54,7 +55,7 @@ system_state(int axis_nr,
 	     const std::vector<int>& map,
 	     const std::vector<teach_point>& teach_points,
 	     const std::vector<double>& weight)
-	: m_axis_nr(axis_nr), m_auxiliary_variable_nr(auxiliary_variable_nr),
+	: cd_detect(0), m_axis_nr(axis_nr), m_auxiliary_variable_nr(auxiliary_variable_nr),
 		m_p(p), m_n(n), m_t(t), m_axes(axes), m_auxiliary_variable(auxiliary_variable),
 		m_map(map), m_teach_points(teach_points), m_weight(weight) {
 		m_axes_values.resize(m_axis_nr);
@@ -118,7 +119,7 @@ system_state(int axis_nr,
 		m_cri = rhs.m_cri;
 	}
 
-	/* system_state(const system_state& rhs): m_axis_nr(rhs.m_axis_nr), m_auxiliary_variable_nr(rhs.m_auxiliary_variable_nr), m_p(rhs.m_p), m_n(rhs.m_n), m_t(rhs.m_t), m_axes(rhs.m_axes), m_auxiliary_variable(rhs.m_auxiliary_variable), m_map(rhs.m_map), m_teach_points(rhs.m_teach_points), m_weight(rhs.m_weight) { */
+	/* system_state(const system_state& rhs): cd_detect(0), m_axis_nr(rhs.m_axis_nr), m_auxiliary_variable_nr(rhs.m_auxiliary_variable_nr), m_p(rhs.m_p), m_n(rhs.m_n), m_t(rhs.m_t), m_axes(rhs.m_axes), m_auxiliary_variable(rhs.m_auxiliary_variable), m_map(rhs.m_map), m_teach_points(rhs.m_teach_points), m_weight(rhs.m_weight) { */
 	/* 	m_axes_values = rhs.m_axes_values; */
 	/* 	m_auxiliary_variable_values = rhs.m_auxiliary_variable_values; */
 	/* 	m_sub_cri_axis = rhs.m_sub_cri_axis; */

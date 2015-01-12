@@ -9,14 +9,15 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 //    HttpClient httpclient("http://223.3.63.147:8383");
-    HttpClient httpclient("http://localhost:8383");
+    if (argc != 3) {
+	    std::cout << "usage: client test1.pos http://localhost:8383" << std::endl;
+	    return 0;
+    }
+
+    HttpClient httpclient(argv[2]);
 //    HttpClient httpclient("http://223.3.56.142:8383");
     path_plan_client c(httpclient);
 
-    if (argc != 2) {
-	    std::cout << "usage: client test1.pos" << std::endl;
-	    return 0;
-    }
     job myjob(argv[1]);
     int job_id = 0;
     try
