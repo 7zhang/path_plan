@@ -403,13 +403,13 @@ void robot_system<T>::operator()()
 //		std::cout << std::endl;
 
 		boost::unique_lock<boost::mutex> lock(m_mutex);
+		m_states.push_back(cur_state);
+		pre_state = cur_state;
+
 		if (push_value(cur_state)) {
 			std::cerr << "state illegal" << std::endl;
 			break;
 		}
-
-		m_states.push_back(cur_state);
-		pre_state = cur_state;
 
 		m_i = i;
 //		std::cout << m_states[m_i].to_string() << std::endl;		
@@ -435,7 +435,7 @@ void robot_system<T>::operator()()
 	double sum = 0.0;
 	int len = m_states.size();
 	for (int i = 0; i < len; i++) {
-		if (m_states[i].cd()) {
+		if (1 || m_states[i].cd()) {
 			recommend = -1.0;
 			goto finish;
 		} else {

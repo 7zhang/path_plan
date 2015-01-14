@@ -37,6 +37,8 @@
 
 namespace de
 {
+//static thread_local std::random_device rd;
+//static thread_local  boost::random::mt19937 gen(rd());
 
 inline double genrand( double min = 0, double max = 1 )
 {
@@ -49,6 +51,7 @@ inline double genrand( double min = 0, double max = 1 )
 	if (min > max - 1e-6 && min < max + 1e-6) {
 		return min;
 	}
+
 	static std::random_device rd;
 	static boost::random::mt19937 gen(rd());
 	boost::random::uniform_real_distribution<> dist( min, max );

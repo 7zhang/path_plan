@@ -53,6 +53,7 @@ void plan_strategy<T>::operator() ()
 	std::cout << "start_tries size: " << start_tries.size() << std::endl;
 	for (int i = 1; i < try_times; i++) {
 		int result = 1;
+		std::cerr << "start_tries[i]->m_states.size(): " << (start_tries[i]->m_states).size() << std::endl;
 		for (int j = 0; j < candidate.size(); j++) {
 			std::cerr << "candidate.size(): " << candidate.size() << std::endl; 
 
