@@ -1,6 +1,8 @@
 #ifndef _JOB_H_
 #define _JOB_H_
 
+#include <string>
+#include <iostream>
 #include "load_seam.h"
 
 class job

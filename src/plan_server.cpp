@@ -8,6 +8,7 @@
 #include "robot.h"
 //#include "kunshan/kunshan_robot.h"
 #include "kuka/kr5arc_robot.h"
+#include "plan_strategy.h"
 using namespace std;
 using namespace jsonrpc;
 
@@ -44,10 +45,10 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 	}
 
 	std::vector<std::string> stl_path;
-	job myjob(p, n, t);
+//	job myjob(p, n, t);
 //	robot_system<kunshan_robot> kunshan("kunshan robot", 6, 60, 0.001, stl_path, myjob);
 
-	robot_system<T> *work = new robot_system<T>(m_works.size(), 60, 0.001, stl_path, myjob);
+	plan_strategy<T> *work = new plan_strategy<T>(p, n, t);
 
 	int job_id = 0;
 	int i = 0;
@@ -65,7 +66,7 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 		job_id = i;
 	}
 
-	std::cout << work->get_sys_info();
+//	std::cout << work->get_sys_info();
 	std::cout << "add job " << m_works.size() - 1 << std::endl << std::endl;
 
 	boost::thread* th( new boost::thread(boost::ref(*work)) );
@@ -111,13 +112,13 @@ void path_plan_server<T>::get_finish_rate(const Json::Value &request, Json::Valu
 	std::vector<double> m_sub_cri_aux;
 	std::vector<double> m_sub_cri_teach;
 	double m_cri;
-
-	std::pair<int, int> ret = m_works[job_id]->get_finish_rate(k, m_axes_values, 
-								   m_auxiliary_variable_values,
-								   m_sub_cri_axis,
-								   m_sub_cri_aux,
-								   m_sub_cri_teach,
-								   m_cri);
+	std::pair<int, int> ret;
+	// std::pair<int, int> ret = m_works[job_id]->get_finish_rate(k, m_axes_values, 
+	// 							   m_auxiliary_variable_values,
+	// 							   m_sub_cri_axis,
+	// 							   m_sub_cri_aux,
+	// 							   m_sub_cri_teach,
+	// 							   m_cri);
 
 	response["size"] = ret.first;
 	response["finished"] = ret.second;
@@ -195,7 +196,7 @@ void path_plan_server<T>::set_sys_parameter_int(const Json::Value &request, Json
 	int ret = 0;
 	if (para_name == "de_pop_size" || para_name == "de_thread_nr") {
 		ivalue = pvalue.asInt();
-		ret = m_works[job_id]->set_sys_parameter(para_name, &ivalue, restart);	
+//		ret = m_works[job_id]->set_sys_parameter(para_name, &ivalue, restart);	
 	} else {
 		response = -1;
 		return;
@@ -240,7 +241,7 @@ void path_plan_server<T>::set_sys_parameter_double(const Json::Value &request, J
 	int ret = 0;
 	if (para_name == "de_weight" || para_name == "de_crossover") {
 		dvalue = pvalue.asDouble();
-		ret = m_works[job_id]->set_sys_parameter(para_name, &dvalue, restart);	
+//		ret = m_works[job_id]->set_sys_parameter(para_name, &dvalue, restart);	
 	} else {
 		response = -1;
 		return;

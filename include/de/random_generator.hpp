@@ -27,6 +27,7 @@
 #pragma once
 #endif
 
+#include <ctime>
 #include <random>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/random/uniform_real_distribution.hpp>

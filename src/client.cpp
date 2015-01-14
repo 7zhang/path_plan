@@ -37,28 +37,28 @@ int main(int argc, char *argv[])
         cerr << e.what() << endl;
     }
 
-    try {
-    	    std::pair<int, int> finish_rate(0, 0);
+    // try {
+    // 	    std::pair<int, int> finish_rate(0, 0);
 
-    	    while(finish_rate.second < myjob.get_size()) {
-		    path_plan_client::sys_state state;
-    		    finish_rate = c.get_finish_rate(job_id, -1, state);
-    		    if (finish_rate.first < 0) {
-    			    std::cout << "job " << job_id << " size " 
-    				      << -finish_rate.first << ": can't be finished, stop at "
-    				      << finish_rate.second << std::endl;
-    			    break;
-    		    }
-    		    std::cout << "job " << job_id << " size " << finish_rate.first << ": " 
-    			      << finish_rate.second << " finished " << std::endl;
-		    std::cout << state.to_string() << std::endl;
-    		    boost::this_thread::sleep( boost::posix_time::milliseconds(200) );
-    	    }
-    }
-    catch (JsonRpcException e)
-    {
-        cerr << e.what() << endl;
-    }
+    // 	    while(finish_rate.second < myjob.get_size()) {
+    // 		    path_plan_client::sys_state state;
+    // 		    finish_rate = c.get_finish_rate(job_id, -1, state);
+    // 		    if (finish_rate.first < 0) {
+    // 			    std::cout << "job " << job_id << " size " 
+    // 				      << -finish_rate.first << ": can't be finished, stop at "
+    // 				      << finish_rate.second << std::endl;
+    // 			    break;
+    // 		    }
+    // 		    std::cout << "job " << job_id << " size " << finish_rate.first << ": " 
+    // 			      << finish_rate.second << " finished " << std::endl;
+    // 		    std::cout << state.to_string() << std::endl;
+    // 		    boost::this_thread::sleep( boost::posix_time::milliseconds(200) );
+    // 	    }
+    // }
+    // catch (JsonRpcException e)
+    // {
+    //     cerr << e.what() << endl;
+    // }
 
     // boost::this_thread::sleep( boost::posix_time::milliseconds(3000) );
     // try {

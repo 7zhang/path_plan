@@ -377,6 +377,8 @@ private:
 	processor_listener_ptr m_listener;
 	size_t m_index;
 	size_t m_thread_count;
+	std::random_device rd;
+	boost::random::mt19937 gen;
 
 	bool m_result;
 

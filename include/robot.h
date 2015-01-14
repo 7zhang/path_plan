@@ -19,8 +19,8 @@
 
 using namespace de;
 
-int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path);
-int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path);
+static int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path);
+static int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path);
 
 
 class robot_listener : public de::listener
@@ -67,7 +67,7 @@ public:
 template <typename T>
 class robot_system
 {
-private:
+public:
 //      lock m_continue and m_i	
 	boost::mutex m_mutex;
 //	boost::condition_variable m_cond;
@@ -84,6 +84,7 @@ private:
 	double m_weight;
 	double m_crossover;
 
+	double recommend;
 	std::vector<T> m_states;
 	std::vector<std::string> m_stl_path;
 //	std::string m_seam;
@@ -108,7 +109,7 @@ public:
 robot_system(int job_id, int pop_size, int time_interval, 
 	     std::vector<std::string> stl_path, std::string seam) :
 	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
-		m_stl_path(stl_path), m_job(seam), m_i(-1), m_continue(1) {
+		m_stl_path(stl_path), m_job(seam), m_i(-1), m_continue(1), recommend(1.0) {
 		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		optimize_init();
 	}
@@ -116,7 +117,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 robot_system(int job_id, int pop_size, int time_interval, 
 	     std::vector<std::string> stl_path, job j) :
 	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
-		m_stl_path(stl_path) , m_job(j), m_i(-1), m_continue(1){
+		m_stl_path(stl_path) , m_job(j), m_i(-1), m_continue(1), recommend(1.0) {
 		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		optimize_init();
 	}
@@ -326,40 +327,41 @@ void robot_system<T>::operator()()
 		std::cerr << best->cost() << endl;
 
 		double cost = cur_state(best->vars());
+		std::cerr << std::endl << cur_state.to_string() << std::endl;
+		/* if (cur_state.cd()) { */
+		/* 	std::cerr << "triggered" << std::endl; */
+		/* 	cd_detect = 1; */
+		/* 	i--; */
+		/* 	continue; */
+		/* } */
 
-		if (cur_state.cd()) {
-			std::cerr << "triggered" << std::endl;
-			cd_detect = 1;
-			i--;
-			continue;
-		}
+		/* if (try_times >= 0 && try_times < 20) { */
+		/* 	try_vector.push_back(cur_state); */
+		/* 	try_times++; */
+		/* 	i--; */
+		/* 	continue; */
+		/* } else if (try_times == 20) { */
+		/* 	try_times = -1; */
+		/* 	int best_index = 0; */
+		/* 	double best_cost = 0.0; */
+		/* 	for (int i = 0; i < try_vector.size(); i++) { */
+		/* 		if (best_cost < try_vector[i].m_cri) { */
+		/* 			best_cost = try_vector[i].m_cri; */
+		/* 			best_index = i; */
+		/* 		} */
+		/* 	} */
 
-		if (try_times >= 0 && try_times < 20) {
-			try_vector.push_back(cur_state);
-			try_times++;
-			i--;
-			continue;
-		} else if (try_times == 20) {
-			try_times = -1;
-			int best_index = 0;
-			double best_cost = 0.0;
-			for (int i = 0; i < try_vector.size(); i++) {
-				if (best_cost < try_vector[i].m_cri) {
-					best_cost = try_vector[i].m_cri;
-					best_index = i;
-				}
-			}
+		/* 	try_vector.clear(); */
+		/* 	std::cerr << "best start point index: " << best_index << std::endl; */
+		/* 	cur_state = try_vector[best_index]; */
+		/* } */
 
-			try_vector.clear();
-			std::cerr << "best start point index: " << best_index << std::endl;
-			cur_state = try_vector[best_index];
-		}
-
-		cd_detect = 0;
+		/* cd_detect = 0; */
 		double diff = cur_state.dist(pre_state);
 
 		if (i > 0 && diff > 200 && err_count < 100) {
 			err_count++;
+			std::cerr << "err_count = " << err_count << std::endl;
 			i--;
 			continue;
 		}
@@ -369,7 +371,7 @@ void robot_system<T>::operator()()
 		}
 		err_count = 0;
 
-		std::cout << cur_state.to_string() << std::endl;
+//		std::cout << cur_state.to_string() << std::endl;
 
 //		cur_state.check();
 //		std::cout << "cost: ";
@@ -429,7 +431,19 @@ void robot_system<T>::operator()()
 	}
 
 	boost::unique_lock<boost::mutex> lock(m_mutex);
-	m_continue = 0;
+	double sum = 0.0;
+	int len = m_states.size();
+	for (int i = 0; i < len; i++) {
+		if (m_states[i].cd()) {
+			recommend = -1.0;
+			goto finish;
+		} else {
+			sum += m_states[i].m_cri;
+		}
+	}
+
+	recommend = sum / len;
+finish:	m_continue = 0;
 //	m_cond.notify_one();
 
 	program_jpos(best_angle, best_ex_angle, "./program.glp");
@@ -444,7 +458,7 @@ void robot_system<T>::set_de_args(int pop_size, int thread_nr, double weight, do
 	m_crossover = crossover;
 }
 
-int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path)
+static int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path)
 {
 	// for (int i = 1; i < angle.size(); i++) {
 	// 	to_continuous(angle[i], angle[i - 1]);
@@ -473,7 +487,7 @@ int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *pa
 	return 0;
 }
 
-int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path)
+static int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path)
 {
 	FILE *file;
 	if((file = fopen(path, "wb")) == NULL) {
