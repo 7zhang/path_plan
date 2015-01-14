@@ -356,6 +356,7 @@ void robot_system<T>::operator()()
 		/* 	cur_state = try_vector[best_index]; */
 		/* } */
 
+
 		/* cd_detect = 0; */
 		double diff = cur_state.dist(pre_state);
 
