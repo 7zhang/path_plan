@@ -408,6 +408,7 @@ void robot_system<T>::operator()()
 
 		if (push_value(cur_state)) {
 			std::cerr << "state illegal" << std::endl;
+			recommend = -1.0;
 			break;
 		}
 
@@ -435,7 +436,7 @@ void robot_system<T>::operator()()
 	double sum = 0.0;
 	int len = m_states.size();
 	for (int i = 0; i < len; i++) {
-		if (1 || m_states[i].cd()) {
+		if (m_states[i].cd() || recommend < 0.0) {
 			recommend = -1.0;
 			goto finish;
 		} else {

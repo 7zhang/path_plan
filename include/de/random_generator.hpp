@@ -34,9 +34,18 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
+#include <time.h>
 
 namespace de
 {
+
+inline unsigned int get_seed()
+{
+	timespec ts;
+   // clock_gettime(CLOCK_MONOTONIC, &ts); // Works on FreeBSD
+	clock_gettime(CLOCK_REALTIME, &ts);
+	return ts.tv_nsec;
+}
 
 inline double genrand( double min = 0, double max = 1 )
 {
@@ -51,7 +60,7 @@ inline double genrand( double min = 0, double max = 1 )
 	}
 
 //	static thread_local std::random_device rd("/dev/urandom");
-	static thread_local  boost::random::mt19937 gen(time(NULL));
+	static thread_local  boost::random::mt19937 gen(get_seed());
 
 //	static std::random_device rd;
 //	static boost::random::mt19937 gen(rd());
