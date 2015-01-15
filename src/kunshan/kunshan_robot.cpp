@@ -62,18 +62,18 @@ void kunshan_robot::init(std::string& m_sys_name,
 		sigma_axis[i] = m_axes[i].length() / 6.0;
 	}
 
-	mu_axis[0] = 36;
-	sigma_axis[0] = 30;
+	// mu_axis[0] = 36;
+	// sigma_axis[0] = 30;
 
 
-	mu_axis[2] = 70;
-	sigma_axis[2] = 30;
+	// mu_axis[2] = 70;
+	// sigma_axis[2] = 30;
 	
-	mu_axis[7] = 150;
-	sigma_axis[7] = 30;
+	// mu_axis[7] = 150;
+	// sigma_axis[7] = 30;
 
-	teach_point t1(mu_axis, sigma_axis, offset_axis, weight_axis, mu_axis, sigma_axis, offset_axis, weight_axis);
-	m_teach_points.push_back(t1);
+	// teach_point t1(mu_axis, sigma_axis, offset_axis, weight_axis, mu_axis, sigma_axis, offset_axis, weight_axis);
+	// m_teach_points.push_back(t1);
 	m_weight.push_back(1.0);
 }
 

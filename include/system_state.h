@@ -358,7 +358,7 @@ system_state(int axis_nr,
 		}
 
 		for (int i = 0; i < m_teach_points.size(); i++) {
-			m_sub_cri_teach[i] = m_teach_points[i](m_axes_values, m_auxiliary_variable_values);
+			m_sub_cri_teach[i] = m_teach_points[i](m_axes, m_auxiliary_variable, m_axes_values, m_auxiliary_variable_values, m_p);
 			m_cri *= m_sub_cri_teach[i];
 		}		
 		

@@ -13,8 +13,15 @@ class plan_strategy
 	std::vector<Vector3D> m_n;
 	std::vector<Vector3D> m_t;
 	int m_size;
+
+//	std::vector<robot_system<T> *> candidate;
+	std::vector<robot_system<T> *> tries;
+	robot_system<T> *result;
+	int index;
 public:
-	plan_strategy(std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) : m_p(p), m_n(n), m_t(t) { m_size = p.size();}
+	plan_strategy(std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) : m_p(p), m_n(n), m_t(t) { 
+		m_size = p.size();
+	}
 	void operator() ();
 };
 
@@ -51,11 +58,20 @@ void plan_strategy<T>::operator() ()
 //	m_threads.join_all();
 
 	std::vector<robot_system<T> *> candidate;
-
-	candidate.push_back(start_tries[0]);
+//ZhangYaoxue zai ci
+	int zyx = 0;
+	for (; zyx < start_tries.size(); zyx++) {
+		if (start_tries[zyx]->recommend > 0.0) {
+			candidate.push_back(start_tries[zyx]);
+			break;
+		} else {
+			delete start_tries[zyx];
+		}
+	}
+	
 //	std::cout << "candidate size: " << candidate.size() << std::endl;
 //	std::cout << "start_tries size: " << start_tries.size() << std::endl;
-	for (int i = 1; i < try_times; i++) {
+	for (int i = zyx + 1; i < start_tries.size(); i++) {
 		int result = 1;
 //		std::cerr << std::endl << start_tries[i]->m_states[0].to_string() << std::endl;
 //		std::cerr << "start_tries[i]->m_states.size(): " << (start_tries[i]->m_states).size() << std::endl;
@@ -95,7 +111,7 @@ void plan_strategy<T>::operator() ()
 	}
 
 	job sample(tmpp, tmpn, tmpt);
-	std::vector<robot_system<T> *> tries;
+
 	boost::thread_group ths1;
 	std::cerr << "sample size: " << sample.get_size() << std::endl;
 	for (int i = 0; i < candidate.size(); i++) {
@@ -113,7 +129,7 @@ void plan_strategy<T>::operator() ()
 	ths1.join_all();
 
 	/* std::cerr << "finished" << std::endl; */
-	int index = 0;
+//	int index = 0;
 	double max_recommend = -1.0;
 	for (int i = 0; i < tries.size(); i++) {
 		if (tries[i]->recommend > max_recommend) {
@@ -128,16 +144,26 @@ void plan_strategy<T>::operator() ()
 	}
 // now finish the whole plan with start point at tries[index]
 	boost::thread_group ths2;
-	robot_system<T> *work = new robot_system<T>(0, 60, 0.001, stl_path, job(m_p, m_n, m_t));
-	work->push_value(tries[index]->m_states[0]);
-	tries.push_back(work);
-	boost::thread* th( new boost::thread(boost::ref(*work)) );
+	result = new robot_system<T>(0, 60, 0.001, stl_path, job(m_p, m_n, m_t));
+	result->push_value(tries[index]->m_states[0]);
+//	tries.push_back(work);
+	boost::thread* th( new boost::thread(boost::ref(*result)) );
 	ths2.add_thread( th );
 	
 	ths2.join_all();
 
-	std::cerr << "globally best path index: " << index << std::endl;
-	std::cerr << std::endl << "start point:" << tries[index]->m_states[0].to_string() << std::endl;	
+	std::cerr << std::endl << std::endl
+		  << "statistics: tries size: " << tries.size() 
+		  << ", globally best path index: " << index << std::endl;
+	std::cerr << "i = " << index << ", recommend = " 
+		  << tries[index]->recommend << ", start point:" 
+		  << tries[index]->m_states[0].to_string() << std::endl;	
+	for (int i = 0; i < tries.size(); i++) {
+		if (i != index) {
+			std::cerr << "i = " << i << ", recommend = " << tries[i]->recommend
+				  << ", start point:" << tries[i]->m_states[0].to_string() << std::endl;
+		}
+	}
 }
 
 #endif /* _PLAN_STRATEGY_H_ */

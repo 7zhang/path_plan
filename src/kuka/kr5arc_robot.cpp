@@ -65,72 +65,72 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 		mu_axis[i] = m_axes[i].mid();
 		sigma_axis[i] = m_axes[i].length() / 6.0;
 	}
-        mu_axis[0] = -0.397979;
-        sigma_axis[0] = 20;
+        // mu_axis[0] = -0.397979;
+        // sigma_axis[0] = 20;
 
-        mu_axis[1] = 34.0548;
-        sigma_axis[1] = 20;
+        // mu_axis[1] = 34.0548;
+        // sigma_axis[1] = 20;
 
-        mu_axis[2] = 56.86620;
-        sigma_axis[2] = 20;
+        // mu_axis[2] = 56.86620;
+        // sigma_axis[2] = 20;
 
-        mu_axis[3] = -31.8202;
-        sigma_axis[3] = 20;
+        // mu_axis[3] = -31.8202;
+        // sigma_axis[3] = 20;
 
-        mu_axis[4] = -70.2386;
-        sigma_axis[4] = 20;
+        // mu_axis[4] = -70.2386;
+        // sigma_axis[4] = 20;
 
-        mu_axis[5] = -145.726;
-        sigma_axis[5] = 20;
+        // mu_axis[5] = -145.726;
+        // sigma_axis[5] = 20;
 
-        mu_axis[6] = 53.6836;
-        sigma_axis[6] = 20;
+        // mu_axis[6] = 53.6836;
+        // sigma_axis[6] = 20;
         
-        mu_axis[7] = -91.7367;
-        sigma_axis[7] = 20;
+        // mu_axis[7] = -91.7367;
+        // sigma_axis[7] = 20;
 
-        mu_axis[8] = 55.95020;
-        sigma_axis[8] = 20;
+        // mu_axis[8] = 55.95020;
+        // sigma_axis[8] = 20;
 
-        mu_axis[9] = 440.602;
-        sigma_axis[9] = 20;
+        // mu_axis[9] = 440.602;
+        // sigma_axis[9] = 20;
 
-	std::vector<double> aux_axis(6);
-	std::vector<double> aux_sigma_axis(6);
-	aux_axis[0] = -13.9378;
-        aux_sigma_axis[0] = 20;
+	// std::vector<double> aux_axis(6);
+	// std::vector<double> aux_sigma_axis(6);
+	// aux_axis[0] = -13.9378;
+        // aux_sigma_axis[0] = 20;
 
-        aux_axis[1] = -3.91739;
-        aux_sigma_axis[1] = 20;
+        // aux_axis[1] = -3.91739;
+        // aux_sigma_axis[1] = 20;
 
-        aux_axis[2] = 2.11313;
-        aux_sigma_axis[2] = 20;
+        // aux_axis[2] = 2.11313;
+        // aux_sigma_axis[2] = 20;
 
-        aux_axis[3] = 0.550153;
-        aux_sigma_axis[3] = 20;
+        // aux_axis[3] = 0.550153;
+        // aux_sigma_axis[3] = 20;
 
-        aux_axis[4] = 8.84606;
-        aux_sigma_axis[4] = 20;
+        // aux_axis[4] = 8.84606;
+        // aux_sigma_axis[4] = 20;
 
-        aux_axis[5] = 88.6357;
-        aux_sigma_axis[5] = 20;
-
-	
-	// mu_axis[0] = 36;
-	// sigma_axis[0] = 30;
-
-
-	// mu_axis[2] = 70;
-	// sigma_axis[2] = 30;
-	
-	// mu_axis[7] = 150;
-	// sigma_axis[7] = 30;
+        // aux_axis[5] = 88.6357;
+        // aux_sigma_axis[5] = 20;
 
 	
+	// // mu_axis[0] = 36;
+	// // sigma_axis[0] = 30;
 
-//	teach_point t1(mu_axis, sigma_axis, offset_axis, weight_axis, aux_axis, aux_sigma_axis, offset_axis, weight_axis);
-//	m_teach_points.push_back(t1);
-	m_weight.push_back(1.0);
+
+	// // mu_axis[2] = 70;
+	// // sigma_axis[2] = 30;
+	
+	// // mu_axis[7] = 150;
+	// // sigma_axis[7] = 30;
+
+	
+
+	// teach_point t1(mu_axis, sigma_axis, offset_axis, weight_axis, aux_axis, aux_sigma_axis, offset_axis, weight_axis);
+	// m_teach_points.push_back(t1);
+//	m_weight.push_back(1.0);
 
 	cd_initialize();
 }
