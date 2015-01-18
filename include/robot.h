@@ -360,14 +360,14 @@ void robot_system<T>::operator()()
 		/* cd_detect = 0; */
 		double diff = cur_state.dist(pre_state);
 
-		if (i > 0 && diff > 200 && err_count < 100) {
+		if (i > 0 && diff > 200 && err_count < 10) {
 			err_count++;
 			std::cerr << "err_count = " << err_count << std::endl;
 			i--;
 			continue;
 		}
 
-		if (err_count > 99) {
+		if (err_count > 9) {
 			std::cerr << "failled but tried" << std::endl;
 		}
 		err_count = 0;

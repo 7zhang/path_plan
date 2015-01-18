@@ -126,6 +126,9 @@ public:
 
 	virtual bool event( individual_ptr best, size_t genCount, const population& pop)
 	{
+		if (genCount > 1000) {
+			return false;
+		}	
 		double mu = 0.0;
 		double size = pop.size();
 		double max_cost = 0.0;

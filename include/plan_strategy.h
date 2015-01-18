@@ -128,6 +128,16 @@ void plan_strategy<T>::operator() ()
 	tmpp.clear();
 	tmpn.clear();
 	tmpt.clear();
+	
+	int inc = 0;
+	if (m_size < 50) {
+		inc = 2;
+	} else if (m_size < 100){
+		inc = 3;
+	} else {
+		inc = 10;
+	}
+
 	for (int i = 0; i < m_size; i += 10) {
 		tmpp.push_back(m_p[i]);
 		tmpn.push_back(m_n[i]);
