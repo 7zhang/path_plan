@@ -110,6 +110,9 @@ path_plan_client(jsonrpc::IClientConnector &conn, jsonrpc::clientVersion_t type 
 		if (result.isObject()) {
 			int size = result["size"].asInt();
 			int finished = result["finished"].asInt();
+			if (size == 0 && finished == 0) {
+				return make_pair(size, finished);
+			}
 			Json::Value axes = result["axes"];
 			for (int i = 0; i < axes.size(); i++) {
 				state.m_axes_values.push_back(axes[i].asDouble());

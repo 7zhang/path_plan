@@ -112,13 +112,20 @@ void path_plan_server<T>::get_finish_rate(const Json::Value &request, Json::Valu
 	std::vector<double> m_sub_cri_aux;
 	std::vector<double> m_sub_cri_teach;
 	double m_cri;
-	std::pair<int, int> ret;
-	// std::pair<int, int> ret = m_works[job_id]->get_finish_rate(k, m_axes_values, 
-	// 							   m_auxiliary_variable_values,
-	// 							   m_sub_cri_axis,
-	// 							   m_sub_cri_aux,
-	// 							   m_sub_cri_teach,
-	// 							   m_cri);
+//	std::pair<int, int> ret;
+	int status = m_works[job_id]->get_status();
+
+	if (status < 4) {
+		response["size"] = 0;
+		response["finished"] = 0;
+		return;
+	}
+	std::pair<int, int> ret = m_works[job_id]->result->get_finish_rate(k, m_axes_values, 
+								   m_auxiliary_variable_values,
+								   m_sub_cri_axis,
+								   m_sub_cri_aux,
+								   m_sub_cri_teach,
+								   m_cri);
 
 	response["size"] = ret.first;
 	response["finished"] = ret.second;

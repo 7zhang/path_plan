@@ -9,10 +9,13 @@
 template <typename T>
 class plan_strategy
 {
+public:
+	boost::mutex m_mutex;
 	std::vector<Vector3D> m_p;
 	std::vector<Vector3D> m_n;
 	std::vector<Vector3D> m_t;
 	int m_size;
+	int m_status;
 
 //	std::vector<robot_system<T> *> candidate;
 	std::vector<robot_system<T> *> tries;
@@ -21,14 +24,34 @@ class plan_strategy
 public:
 	plan_strategy(std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) : m_p(p), m_n(n), m_t(t) { 
 		m_size = p.size();
+		result = NULL;
+		m_status = -1;
 	}
 	void operator() ();
+	int set_status(int status) {
+		boost::unique_lock<boost::mutex> lock(m_mutex);
+		m_status = status;
+	}
+	int get_status() {
+		boost::unique_lock<boost::mutex> lock(m_mutex);
+		return m_status;
+	}
+
+	~plan_strategy() {
+		if (result)
+			delete result;
+		for (int i = 0; i < tries.size(); i++) {
+			if (tries[i])
+				delete tries[i];
+		}
+	}
 };
 
 const int try_times = 20;
 template <typename T>
 void plan_strategy<T>::operator() ()
 {
+	set_status(0);
 	std::vector<std::string> stl_path;
 	std::vector<Vector3D> tmpp, tmpn, tmpt;
 	tmpp.push_back(m_p[0]);
@@ -98,6 +121,7 @@ void plan_strategy<T>::operator() ()
 		std::cerr << std::endl << candidate[i]->m_states[0].to_string() << std::endl;
 	}
 	if (candidate.size() == 0) {
+		set_status(1);
 		return ;
 	}
 
@@ -110,8 +134,9 @@ void plan_strategy<T>::operator() ()
 		tmpt.push_back(m_t[i]);
 	}
 
+	set_status(2);
 	job sample(tmpp, tmpn, tmpt);
-
+	
 	boost::thread_group ths1;
 	std::cerr << "sample size: " << sample.get_size() << std::endl;
 	for (int i = 0; i < candidate.size(); i++) {
@@ -124,6 +149,7 @@ void plan_strategy<T>::operator() ()
 		} catch (...) {
 			std::cerr << "exception" << std::endl;
 		}
+		delete candidate[i];
 	}
 
 	ths1.join_all();
@@ -140,6 +166,7 @@ void plan_strategy<T>::operator() ()
 
 	if (max_recommend < 0.0) {
 		std::cerr << "can't finish" << std::endl;
+		set_status(3);
 		return;
 	}
 // now finish the whole plan with start point at tries[index]
@@ -147,6 +174,9 @@ void plan_strategy<T>::operator() ()
 	result = new robot_system<T>(0, 60, 0.001, stl_path, job(m_p, m_n, m_t));
 	result->push_value(tries[index]->m_states[0]);
 //	tries.push_back(work);
+
+	set_status(4);
+
 	boost::thread* th( new boost::thread(boost::ref(*result)) );
 	ths2.add_thread( th );
 	
@@ -164,6 +194,7 @@ void plan_strategy<T>::operator() ()
 				  << ", start point:" << tries[i]->m_states[0].to_string() << std::endl;
 		}
 	}
+	set_status(5);
 }
 
 #endif /* _PLAN_STRATEGY_H_ */
