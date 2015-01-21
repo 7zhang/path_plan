@@ -448,7 +448,7 @@ void robot_system<T>::operator()()
 finish:	m_continue = 0;
 //	m_cond.notify_one();
 
-	program_jpos(best_angle, best_ex_angle, "./program.glp");
+//	program_jpos(best_angle, best_ex_angle, "./program.glp");
 }
 
 template <typename T>

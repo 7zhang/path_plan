@@ -34,7 +34,7 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_axes[5] = axis(-350.0, 350.0, 50.0, 10.0, 10, 0, 1.0);
 	//positioner's joint angles
 	m_axes[6] = axis(-185.0, 185.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[7] = axis(-185.0, 185.0, 50.0, 10.0, 10, 0, 1);
+	m_axes[7] = axis(-360.0, 360.0, 50.0, 10.0, 10, 0, 1);
 	//C-style brace's joint angles
 	m_axes[8] = axis(-180.0, 180.0, 50.0, 10.0, 10, 0, 1.0);
 	m_axes[9] = axis(-750.0, 750.0, 50.0, 10.0, 10, 0, 1.0);		//modified
@@ -45,8 +45,8 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0); 	//gun's walking angle
 	m_auxiliary_variable[2] = axis(-180.0, 180.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
 	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
-	m_auxiliary_variable[4] = axis(0.0, 15.0, 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
-	m_auxiliary_variable[5] = axis(75.0, 105.0, 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
+	m_auxiliary_variable[4] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
+	m_auxiliary_variable[5] = axis(0.0, 90.0, 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
 	m_map.push_back(6);
 	m_map.push_back(7);
@@ -183,8 +183,22 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 	Vector3D up(0.0, 0.0, 1.0);
 	n1 = part_trans * m_n;
 	t1 = part_trans * m_t;
-	m_auxiliary_variable_values[4] = angle_between(n1, up);
-	m_auxiliary_variable_values[5] = angle_between(t1, up);
+	m_auxiliary_variable_values[4] = 90 - angle_between(t1, up);
+	double d = sqrt(t1.dx * t1.dx + t1.dy * t1.dy);
+	if (d < 1e-6) {
+		m_auxiliary_variable_values[5] = 90;
+	} else {
+		Vector3D gb_16672_yaxis(t1.dy / d, - t1.dx / d, 0.0);
+		double tmp = gb_16672_yaxis ^ axis_y;
+		if (tmp < 0.0) {
+			gb_16672_yaxis = gb_16672_yaxis * (-1.0);
+		}
+		if (n1.dz > 0.0) {
+			m_auxiliary_variable_values[5] = angle_between(n1, gb_16672_yaxis);
+		} else {
+			m_auxiliary_variable_values[5] = -1.0 * angle_between(n1, gb_16672_yaxis);
+		}
+	}
 				
 	TRANS torch_in_world;
 	torch_in_world = part_trans * gun_in_part;

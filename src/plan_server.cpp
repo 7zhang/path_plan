@@ -263,9 +263,13 @@ void path_plan_server<T>::set_sys_parameter_double(const Json::Value &request, J
 	}
 }
 
-int main()
+int main(int argc, const char *argv[])
 {
-	jsonrpc::HttpServer httpserver(8383);
+	if (argc < 2) {
+		printf("usage server 8383\n");
+		return -1;
+	}
+	jsonrpc::HttpServer httpserver(atoi(argv[1]));
 	KR5ARC_robot::cd_initialize();
 	path_plan_server<KR5ARC_robot > s(httpserver);
 	s.StartListening();
