@@ -150,6 +150,7 @@ void plan_strategy<T>::operator() ()
 	boost::thread_group ths1;
 	std::cerr << "sample size: " << sample.get_size() << std::endl;
 	for (int i = 0; i < candidate.size(); i++) {
+//	for (int i = 0; i < 1; i++) {
 		try {
 			robot_system<T> *work = new robot_system<T>(i, 60, 0.001, stl_path, sample);
 			work->push_value(candidate[i]->m_states[0]);

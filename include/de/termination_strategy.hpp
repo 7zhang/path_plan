@@ -128,7 +128,9 @@ public:
 	{
 		if (genCount > 1000) {
 			return false;
-		}	
+		} else if (genCount < 50) {
+			return true;
+		}
 		double mu = 0.0;
 		double size = pop.size();
 		double max_cost = 0.0;

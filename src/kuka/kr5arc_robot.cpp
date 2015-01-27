@@ -46,7 +46,7 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[2] = axis(-180.0, 180.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
 	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
 	m_auxiliary_variable[4] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
-	m_auxiliary_variable[5] = axis(0.0, 90.0, 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
+	m_auxiliary_variable[5] = axis(-90.0, 90.0, 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
 	m_map.push_back(6);
 	m_map.push_back(7);
