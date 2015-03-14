@@ -2,6 +2,8 @@
 #include "teach_point.h"
 #include "det6x6.h"
 #include "cd.h"
+#include "weld_point.h"
+#include "positioner.h"
 
 /*
  * ten axes
@@ -10,6 +12,43 @@
  *
  *
  */
+
+static inline double select_core(double pre, double value)
+{
+	double dist = fabs(value - pre);
+	while(dist > fabs(value + 360 - pre)) {
+		value += 360;
+	}
+
+	while(dist > fabs(value - 360 - pre)) {
+		value -= 360;
+	}
+
+	return value;
+}
+static inline void select(JAngle pre, vector<JAngle> vec, double ex[2])
+{
+	double theta1 = vec[0].get_angle(1);
+	double theta2 = vec[0].get_angle(2);
+	
+	double theta11 = select_core(pre.get_angle(1), vec[0].get_angle(1));
+	double theta12 = select_core(pre.get_angle(1), vec[1].get_angle(1));
+
+	if (fabs(theta11 - pre.get_angle(1)) < fabs(theta12 - pre.get_angle(1))) {
+		ex[0] = theta11;
+	} else {
+		ex[0] = theta12;
+	}
+
+	double theta21 = select_core(pre.get_angle(2), vec[0].get_angle(2));
+	double theta22 = select_core(pre.get_angle(2), vec[1].get_angle(2));
+
+	if (fabs(theta21 - pre.get_angle(2)) < fabs(theta22 - pre.get_angle(2))) {
+		ex[1] = theta21;
+	} else {
+		ex[1] = theta22;
+	}
+}
 
 void KR5ARC_robot::init(std::string& m_sys_name, 
 			int& m_redundancy,
@@ -46,10 +85,10 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[2] = axis(-180.0, 180.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
 	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
 	m_auxiliary_variable[4] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
-	m_auxiliary_variable[5] = axis(75.0, 105.0, 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
+	m_auxiliary_variable[5] = axis(75, 105.0, 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
-	m_map.push_back(6);
-	m_map.push_back(7);
+	m_map.push_back(14);
+	m_map.push_back(15);
 	m_map.push_back(8);
 	m_map.push_back(9);
 	m_map.push_back(10);
@@ -144,6 +183,7 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 
 	JAngle pre_angle = JAngle(m_axes[0].last(), m_axes[1].last(), m_axes[2].last(),
 				  m_axes[3].last(), m_axes[4].last(), m_axes[5].last());
+	JAngle pre_ex_angle = JAngle(m_axes[6].last(), m_axes[7].last(), 0, 0, 0, 0);
 //	JAngle pre_ex_angle = JAngle(m_axes[6].last(), m_axes[7].last(), m_axes[8].last(),
 //				0.0, 0.0, 0.0);
 	// m_s.in.ex1 = (*args)[0];
@@ -173,32 +213,50 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 
 //	print_trans("gun_in_part", gun_in_part);
 
-	JAngle ex_angle((*args)[0], (*args)[1], (*args)[2], (*args)[3], 0.0, 0.0);//modified
+	double ex[2];
+	weld_point wp(m_p, m_n, m_t, (*args)[0], (*args)[1] - 90);
+	positioner position;
+	std::vector<JAngle> vecangle;
+	int res = position.InverseRobot(wp, vecangle);
+	if (res == 0) {
+		select(pre_ex_angle, vecangle, ex);
+	} else if (res == 1) {
+		ex[0] = pre_ex_angle.get_angle(1);
+		ex[1] = pre_ex_angle.get_angle(2);
+	} else {
+		return std::numeric_limits<double>::quiet_NaN();		
+	}
+
+	m_axes_values[6] = ex[0];
+	m_axes_values[7] = ex[1];
+
+	JAngle ex_angle(ex[0], ex[1], (*args)[2], (*args)[3], 0.0, 0.0);//modified
+	
 	TRANS part_trans;
 	part_trans = this->getTransWorldToWorkpiece(ex_angle);
 
 //	print_trans("part_trans", part_trans);
 
-	Vector3D n1, t1;
-	Vector3D up(0.0, 0.0, 1.0);
-	n1 = part_trans * m_n;
-	t1 = part_trans * m_t;
-	m_auxiliary_variable_values[4] = 90 - angle_between(t1, up);
-	double d = sqrt(t1.dx * t1.dx + t1.dy * t1.dy);
-	if (d < 1e-6) {
-		m_auxiliary_variable_values[5] = 90;
-	} else {
-		Vector3D gb_16672_yaxis(t1.dy / d, - t1.dx / d, 0.0);
-		double tmp = gb_16672_yaxis ^ axis_y;
-		if (tmp < 0.0) {
-			gb_16672_yaxis = gb_16672_yaxis * (-1.0);
-		}
-		if (n1.dz > 0.0) {
-			m_auxiliary_variable_values[5] = angle_between(n1, gb_16672_yaxis);
-		} else {
-			m_auxiliary_variable_values[5] = -1.0 * angle_between(n1, gb_16672_yaxis);
-		}
-	}
+	// Vector3D n1, t1;
+	// Vector3D up(0.0, 0.0, 1.0);
+	// n1 = part_trans * m_n;
+	// t1 = part_trans * m_t;
+	// m_auxiliary_variable_values[4] = 90 - angle_between(t1, up);
+	// double d = sqrt(t1.dx * t1.dx + t1.dy * t1.dy);
+	// if (d < 1e-6) {
+	// 	m_auxiliary_variable_values[5] = 90;
+	// } else {
+	// 	Vector3D gb_16672_yaxis(t1.dy / d, - t1.dx / d, 0.0);
+	// 	double tmp = gb_16672_yaxis ^ axis_y;
+	// 	if (tmp < 0.0) {
+	// 		gb_16672_yaxis = gb_16672_yaxis * (-1.0);
+	// 	}
+	// 	if (n1.dz > 0.0) {
+	// 		m_auxiliary_variable_values[5] = angle_between(n1, gb_16672_yaxis);
+	// 	} else {
+	// 		m_auxiliary_variable_values[5] = -1.0 * angle_between(n1, gb_16672_yaxis);
+	// 	}
+	// }
 				
 	TRANS torch_in_world;
 	torch_in_world = part_trans * gun_in_part;

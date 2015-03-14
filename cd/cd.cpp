@@ -856,7 +856,7 @@ int collision_detection_recur(const volumenode *left_node, const volumenode *rig
 					triangle_cd_count++;
 #endif
 					
-					collision_flag = triangle_cd(&(left_node->tarry[left_node->tindex[i]]), &triangle_tmp);
+					collision_flag = triangle_cd(&(left_node->tarry[left_node->tindex[i]]), &triangle_tmp);					
 					if (collision_flag) {
 #ifdef DEBUG
 						printf("\ntriangle collision!\nindex1 = %d, index2 = %d\n\n",

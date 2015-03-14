@@ -3,6 +3,7 @@
 #include "robotdata.h"
 class DHparameters
 {
+public:
 	double a;
 	double d;
 	double alpha;
