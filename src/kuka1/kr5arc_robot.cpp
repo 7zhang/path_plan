@@ -18,12 +18,14 @@ static inline double select_core(double pre, double value)
 	double dist = fabs(value - pre);
 	while(dist > fabs(value + 360 - pre)) {
 		value += 360;
+		dist = fabs(value - pre);
 	}
-
+	
 	while(dist > fabs(value - 360 - pre)) {
 		value -= 360;
+		dist = fabs(value - pre);
 	}
-
+	
 	return value;
 }
 static inline void select(JAngle pre, vector<JAngle> vec, double ex[2])
@@ -32,23 +34,57 @@ static inline void select(JAngle pre, vector<JAngle> vec, double ex[2])
 	double theta2 = vec[0].get_angle(2);
 	
 	double theta11 = select_core(pre.get_angle(1), vec[0].get_angle(1));
-	double theta12 = select_core(pre.get_angle(1), vec[1].get_angle(1));
-
-	if (fabs(theta11 - pre.get_angle(1)) < fabs(theta12 - pre.get_angle(1))) {
-		ex[0] = theta11;
-	} else {
-		ex[0] = theta12;
-	}
-
 	double theta21 = select_core(pre.get_angle(2), vec[0].get_angle(2));
-	double theta22 = select_core(pre.get_angle(2), vec[1].get_angle(2));
 
-	if (fabs(theta21 - pre.get_angle(2)) < fabs(theta22 - pre.get_angle(2))) {
+	double theta12 = select_core(pre.get_angle(1), vec[1].get_angle(1));	
+	double theta22 = select_core(pre.get_angle(2), vec[1].get_angle(2));
+	
+	if (fabs(theta11 - pre.get_angle(1)) + fabs(theta21 - pre.get_angle(2)) < fabs(theta12 - pre.get_angle(1)) +
+		fabs(theta22 - pre.get_angle(2))) {
+		ex[0] = theta11;
 		ex[1] = theta21;
 	} else {
+		ex[0] = theta12;
 		ex[1] = theta22;
 	}
 }
+
+// static inline double select_core(double pre, double value)
+// {
+// 	double dist = fabs(value - pre);
+// 	while(dist > fabs(value + 360 - pre)) {
+// 		value += 360;
+// 	}
+
+// 	while(dist > fabs(value - 360 - pre)) {
+// 		value -= 360;
+// 	}
+
+// 	return value;
+// }
+// static inline void select(JAngle pre, vector<JAngle> vec, double ex[2])
+// {
+// 	double theta1 = vec[0].get_angle(1);
+// 	double theta2 = vec[0].get_angle(2);
+	
+// 	double theta11 = select_core(pre.get_angle(1), vec[0].get_angle(1));
+// 	double theta12 = select_core(pre.get_angle(1), vec[1].get_angle(1));
+
+// 	if (fabs(theta11 - pre.get_angle(1)) < fabs(theta12 - pre.get_angle(1))) {
+// 		ex[0] = theta11;
+// 	} else {
+// 		ex[0] = theta12;
+// 	}
+
+// 	double theta21 = select_core(pre.get_angle(2), vec[0].get_angle(2));
+// 	double theta22 = select_core(pre.get_angle(2), vec[1].get_angle(2));
+
+// 	if (fabs(theta21 - pre.get_angle(2)) < fabs(theta22 - pre.get_angle(2))) {
+// 		ex[1] = theta21;
+// 	} else {
+// 		ex[1] = theta22;
+// 	}
+// }
 
 void KR5ARC_robot::init(std::string& m_sys_name, 
 			int& m_redundancy,
