@@ -245,7 +245,6 @@ int triangle_cd(const triangle *t1, const triangle *t2)
 	length(&diff1, &dist1);
 	length(&diff2, &dist2);
 
-	int flag = 0;
 	if(dist1 > dist2) {
 		vectorminus(&cross3, &cross1, &diff3);
 		vectorminus(&cross4, &cross1, &diff4);
@@ -254,8 +253,20 @@ int triangle_cd(const triangle *t1, const triangle *t2)
 
 		para3 = dist3 / dist1;
 		para4 = dist4 / dist1;
-		add_sign(&diff3, &diff1, &para3);
-		add_sign(&diff4, &diff1, &para4);
+
+		double tmp1, tmp2;
+		vectordot(&diff3, &diff1, &tmp1);
+		vectordot(&diff4, &diff1, &tmp2);
+		if (tmp1 < 0) {
+			para3 = -para3;
+		}
+
+		if (tmp2 < 0) {
+			para4 = -para4;
+		}
+
+		// add_sign(&diff3, &diff1, &para3);
+		// add_sign(&diff4, &diff1, &para4);
 	} else {
 		vectorminus(&cross1, &cross3, &diff3);
 		vectorminus(&cross2, &cross3, &diff4);
@@ -264,10 +275,45 @@ int triangle_cd(const triangle *t1, const triangle *t2)
 		
 		para3 = dist3 / dist2;
 		para4 = dist4 / dist2;
-		add_sign(&diff3, &diff2, &para3);
-		add_sign(&diff4, &diff2, &para4);
-		flag = 1;
+
+		double tmp1, tmp2;
+		vectordot(&diff3, &diff2, &tmp1);
+		vectordot(&diff4, &diff2, &tmp2);
+		if (tmp1 < 0) {
+			para3 = -para3;
+		}
+
+		if (tmp2 < 0) {
+			para4 = -para4;
+		}
+		// add_sign(&diff3, &diff2, &para3);
+		// add_sign(&diff4, &diff2, &para4);
+		// flag = 1;
 	}
+
+// 	int flag = 0;
+	// if(dist1 > dist2) {
+	// 	vectorminus(&cross3, &cross1, &diff3);
+	// 	vectorminus(&cross4, &cross1, &diff4);
+	// 	length(&diff3, &dist3);
+	// 	length(&diff4, &dist4);
+
+	// 	para3 = dist3 / dist1;
+	// 	para4 = dist4 / dist1;
+	// 	add_sign(&diff3, &diff1, &para3);
+	// 	add_sign(&diff4, &diff1, &para4);
+	// } else {
+	// 	vectorminus(&cross1, &cross3, &diff3);
+	// 	vectorminus(&cross2, &cross3, &diff4);
+	// 	length(&diff3, &dist3);
+	// 	length(&diff4, &dist4);
+		
+	// 	para3 = dist3 / dist2;
+	// 	para4 = dist4 / dist2;
+	// 	add_sign(&diff3, &diff2, &para3);
+	// 	add_sign(&diff4, &diff2, &para4);
+	// 	flag = 1;
+	// }
 
 
 	double min1, min2, max1, max2;

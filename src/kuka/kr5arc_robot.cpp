@@ -301,8 +301,8 @@ void KR5ARC_robot::cd_initialize()
 		return;
 	}
 	cd_parameter cd_para;
-	cd_para.max_length = 60;
-	cd_para.max_triangle = 5;
+	cd_para.max_length = 20;
+	cd_para.max_triangle = 17;
 
 	std::vector<std::string> left_path, right_path;
 	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_lbase.STL");
