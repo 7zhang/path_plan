@@ -7,10 +7,11 @@
 
 class job
 {
-private:
+public:
 	int m_size;
 	std::vector<Vector3D> m_normal, m_tangent, m_point;
 	int m_pos;
+	std::vector<double> m_para;
 public:
 	job(std::string seam) {
 		if (!seam.empty()) {
@@ -33,8 +34,8 @@ public:
 		}
 	}
 
-        job(std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) :
-	m_point(p), m_normal(n), m_tangent(t) {
+        job(int pos, std::vector<double> para, std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) :
+	m_pos(pos), m_para(para), m_point(p), m_normal(n), m_tangent(t) {
 			for (int i = 0; i < m_normal.size(); i++) {
 				m_normal[i].unitize();
 			}

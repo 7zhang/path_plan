@@ -28,19 +28,26 @@ static inline double select_core(double pre, double value)
 	
 	return value;
 }
-static inline void select(JAngle pre, vector<JAngle> vec, double ex[2])
-{
-	double theta1 = vec[0].get_angle(1);
-	double theta2 = vec[0].get_angle(2);
-	
-	double theta11 = select_core(pre.get_angle(1), vec[0].get_angle(1));
-	double theta21 = select_core(pre.get_angle(2), vec[0].get_angle(2));
 
-	double theta12 = select_core(pre.get_angle(1), vec[1].get_angle(1));	
-	double theta22 = select_core(pre.get_angle(2), vec[1].get_angle(2));
+static inline void select(JAngle pre, vector<JAngle> vec, double ex[2], int pos)
+{
+	double pre1, pre2;
+	if (pos) {
+		pre1 = pre.get_angle(1);
+		pre2 = pre.get_angle(2);
+	} else {
+		pre1 = pre.get_angle(5);
+		pre2 = pre.get_angle(6);
+	}
 	
-	if (fabs(theta11 - pre.get_angle(1)) + fabs(theta21 - pre.get_angle(2)) < fabs(theta12 - pre.get_angle(1)) +
-		fabs(theta22 - pre.get_angle(2))) {
+	double theta11 = select_core(pre1, vec[0].get_angle(1));
+	double theta21 = select_core(pre2, vec[0].get_angle(2));
+
+	double theta12 = select_core(pre1, vec[1].get_angle(1));	
+	double theta22 = select_core(pre2, vec[1].get_angle(2));
+	
+	if (fabs(theta11 - pre1) + fabs(theta21 - pre2) < fabs(theta12 - pre1) +
+		fabs(theta22 - pre2)) {
 		ex[0] = theta11;
 		ex[1] = theta21;
 	} else {
@@ -48,6 +55,27 @@ static inline void select(JAngle pre, vector<JAngle> vec, double ex[2])
 		ex[1] = theta22;
 	}
 }
+
+// static inline void select(JAngle pre, vector<JAngle> vec, double ex[2])
+// {
+// 	double theta1 = vec[0].get_angle(1);
+// 	double theta2 = vec[0].get_angle(2);
+	
+// 	double theta11 = select_core(pre.get_angle(1), vec[0].get_angle(1));
+// 	double theta21 = select_core(pre.get_angle(2), vec[0].get_angle(2));
+
+// 	double theta12 = select_core(pre.get_angle(1), vec[1].get_angle(1));	
+// 	double theta22 = select_core(pre.get_angle(2), vec[1].get_angle(2));
+	
+// 	if (fabs(theta11 - pre.get_angle(1)) + fabs(theta21 - pre.get_angle(2)) < fabs(theta12 - pre.get_angle(1)) +
+// 		fabs(theta22 - pre.get_angle(2))) {
+// 		ex[0] = theta11;
+// 		ex[1] = theta21;
+// 	} else {
+// 		ex[0] = theta12;
+// 		ex[1] = theta22;
+// 	}
+// }
 
 // static inline double select_core(double pre, double value)
 // {

@@ -21,11 +21,13 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 		return;
 	}
 
-	if (!(request.isMember("para1") && request.isMember("para2") && request.isMember("para3")))
+	if (!(request.isMember("para1") && request.isMember("para2") && request.isMember("para3") && request.isMember("para4") && request.isMember("para5")))
 	{
 		response = -1;
 		return;
 	}
+	int pos;
+	std::vector<double> para;
 	std::vector<Vector3D> p, n, t;
 	for (int i = 0; i < request["para1"].size(); i++) {
 		if (request["para1"].isArray() && request["para2"].isArray() && request["para3"].isArray()
@@ -44,11 +46,16 @@ void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &res
 		}
 	}
 
+	pos = request["para4"].asInt();
+	Json::Value p5 = request["para5"];
+	for (int i = 0; i < p5.size(); i++) {
+		para.push_back(p5[i].asDouble());
+	}
 	std::vector<std::string> stl_path;
 //	job myjob(p, n, t);
 //	robot_system<kunshan_robot> kunshan("kunshan robot", 6, 60, 0.001, stl_path, myjob);
 
-	plan_strategy<T> *work = new plan_strategy<T>(p, n, t);
+	plan_strategy<T> *work = new plan_strategy<T>(pos, para, p, n, t);
 
 	int job_id = 0;
 	int i = 0;

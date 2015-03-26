@@ -110,7 +110,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 	     std::vector<std::string> stl_path, std::string seam) :
 	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
 		m_stl_path(stl_path), m_job(seam), m_i(-1), m_continue(1), recommend(1.0) {
-		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight, m_job.m_para);
 		optimize_init();
 	}
 
@@ -118,7 +118,7 @@ robot_system(int job_id, int pop_size, int time_interval,
 	     std::vector<std::string> stl_path, job j) :
 	m_job_id(job_id), m_pop_size(pop_size), m_time_interval(time_interval),
 		m_stl_path(stl_path) , m_job(j), m_i(-1), m_continue(1), recommend(1.0) {
-		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
+		T::init(m_sys_name, m_redundancy, m_axis_nr, m_auxiliary_variable_nr, m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight, m_job.m_para);
 		optimize_init();
 	}
 
@@ -253,9 +253,9 @@ template <typename T>
 void robot_system<T>::operator()()
 {
 //	T::init();
-	T pre_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(0), m_job.get_n(0), m_job.get_t(0),
+	T pre_state(m_axis_nr,m_auxiliary_variable_nr, m_job.m_pos, m_job.m_para, m_job.get_p(0), m_job.get_n(0), m_job.get_t(0),
 		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
-	T pre_state_back_up(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(0), m_job.get_n(0), m_job.get_t(0),
+	T pre_state_back_up(m_axis_nr,m_auxiliary_variable_nr, m_job.m_pos, m_job.m_para, m_job.get_p(0), m_job.get_n(0), m_job.get_t(0),
 		    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 	pre_state.m_axes_values[0] = 15.0;
 	pre_state.m_axes_values[1] = -95.0/2;
@@ -299,7 +299,7 @@ void robot_system<T>::operator()()
 		cerr << "i = " << i << ", ";
 		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
 		     << m_job.get_p(i).dz << std::endl;
-		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
+		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.m_pos, m_job.m_para, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
 			    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		cur_state.cd_detect = cd_detect;
 //		cur_state.set_job(m_job.get_p(i), m_job.get_n(i), m_job.get_t(i));

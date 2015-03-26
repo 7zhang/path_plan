@@ -11,6 +11,8 @@ class plan_strategy
 {
 public:
 	boost::mutex m_mutex;
+	int m_pos;
+	std::vector<double> m_para;
 	std::vector<Vector3D> m_p;
 	std::vector<Vector3D> m_n;
 	std::vector<Vector3D> m_t;
@@ -22,7 +24,7 @@ public:
 	robot_system<T> *result;
 	int index;
 public:
-	plan_strategy(std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) : m_p(p), m_n(n), m_t(t) { 
+plan_strategy(int pos, std::vector<double> para, std::vector<Vector3D>& p, std::vector<Vector3D>& n, std::vector<Vector3D>& t) : m_pos(pos), m_para(para), m_p(p), m_n(n), m_t(t) { 
 		m_size = p.size();
 		result = NULL;
 		m_status = -1;
@@ -57,7 +59,7 @@ void plan_strategy<T>::operator() ()
 	tmpp.push_back(m_p[0]);
 	tmpn.push_back(m_n[0]);
 	tmpt.push_back(m_t[0]);
-	job start_point(tmpp, tmpn, tmpt);;
+	job start_point(m_pos, m_para, tmpp, tmpn, tmpt);;
 
 	//std::vector<Vector3D> p, n, t;
 	// for (int i = 0; i < m_size; i += m_size / 10) {
@@ -145,7 +147,7 @@ void plan_strategy<T>::operator() ()
 	}
 
 	set_status(2);
-	job sample(tmpp, tmpn, tmpt);
+	job sample(m_pos, m_para, tmpp, tmpn, tmpt);
 	
 	boost::thread_group ths1;
 	std::cerr << "sample size: " << sample.get_size() << std::endl;
@@ -182,7 +184,7 @@ void plan_strategy<T>::operator() ()
 	}
 // now finish the whole plan with start point at tries[index]
 	boost::thread_group ths2;
-	result = new robot_system<T>(0, 60, 0.001, stl_path, job(m_p, m_n, m_t));
+	result = new robot_system<T>(0, 60, 0.001, stl_path, job(m_pos, m_para, m_p, m_n, m_t));
 	result->push_value(tries[index]->m_states[0]);
 //	tries.push_back(work);
 
@@ -193,6 +195,7 @@ void plan_strategy<T>::operator() ()
 	
 	ths2.join_all();
 
+	std::cerr << "result's recommend: " << result->recommend;
 	std::cerr << std::endl << std::endl
 		  << "statistics: tries size: " << tries.size() 
 		  << ", globally best path index: " << index << std::endl;

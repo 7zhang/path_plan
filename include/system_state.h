@@ -23,7 +23,8 @@ public:
 	const int m_axis_nr;
 	const int m_auxiliary_variable_nr;
 //	int m_sub_cri_nr;
-
+	const int m_pos;
+	const std::vector<double> m_para;
 	const Vector3D& m_p;
 	const Vector3D& m_n;
 	const Vector3D& m_t;
@@ -47,6 +48,8 @@ public:
 public:
 system_state(int axis_nr, 
 	     int auxiliary_variable_nr,
+	     const int pos,
+	     const std::vector<double> para,
 	     const Vector3D& p,
 	     const Vector3D& n,
 	     const Vector3D& t,
@@ -56,7 +59,7 @@ system_state(int axis_nr,
 	     const std::vector<teach_point>& teach_points,
 	     const std::vector<double>& weight)
 	: cd_detect(0), m_axis_nr(axis_nr), m_auxiliary_variable_nr(auxiliary_variable_nr),
-		m_p(p), m_n(n), m_t(t), m_axes(axes), m_auxiliary_variable(auxiliary_variable),
+		m_pos(pos), m_para(para), m_p(p), m_n(n), m_t(t), m_axes(axes), m_auxiliary_variable(auxiliary_variable),
 		m_map(map), m_teach_points(teach_points), m_weight(weight) {
 		m_axes_values.resize(m_axis_nr);
 		m_auxiliary_variable_values.resize(m_auxiliary_variable_nr);

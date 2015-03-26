@@ -14,6 +14,8 @@ class KR5ARC_robot: public system_state
 
 public:
 KR5ARC_robot(int axis_nr, int auxiliary_variable_nr, 
+	     const int pos,
+	     const std::vector<double> para, 
 	      const Vector3D& p, const Vector3D& n, 
 	      const Vector3D& t, const std::vector<axis>& axes, 
 	      const std::vector<axis>& auxiliary_variable, const std::vector<int>& map,
@@ -39,7 +41,7 @@ KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 					std::vector<axis>& m_auxiliary_variable,
 					std::vector<int>& m_map,
 					std::vector<teach_point>& m_teach_points,
-					std::vector<double>& m_weight);
+                                        std::vector<double>& m_weight, std::vector<double>& para);
 	/**
 	/*transformation about robot 
 	/*@2014.1.4

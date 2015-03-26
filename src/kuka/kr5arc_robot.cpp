@@ -19,7 +19,7 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 			std::vector<axis>& m_auxiliary_variable,
 			std::vector<int>& m_map,
 			std::vector<teach_point>& m_teach_points,
-			std::vector<double>& m_weight)
+			std::vector<double>& m_weight, std::vector<double>& para)
 {
 	m_sys_name = "KR5ARC Robot System";	//modified
 	m_redundancy = 7;			//modified
@@ -45,9 +45,10 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0); 	//gun's walking angle
 	m_auxiliary_variable[2] = axis(-180.0, 180.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
 	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
-	m_auxiliary_variable[4] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
-	m_auxiliary_variable[5] = axis(75.0, 105.0, 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
+	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
+	m_auxiliary_variable[5] = axis(-15.0 + para[1], 15.0 + para[1], 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
+	std::cout << "para:" << para[0] << " " << para[1] << std::endl;
 	m_map.push_back(6);
 	m_map.push_back(7);
 	m_map.push_back(8);
@@ -175,7 +176,8 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 
 	JAngle ex_angle((*args)[0], (*args)[1], (*args)[2], (*args)[3], 0.0, 0.0);//modified
 	TRANS part_trans;
-	part_trans = this->getTransWorldToWorkpiece(ex_angle);
+	KR5ARC_RKA kr5;
+	part_trans = kr5.getTransWorldToWorkpiece(m_pos, 3, ex_angle);
 
 //	print_trans("part_trans", part_trans);
 
@@ -282,12 +284,14 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 std::vector<volumenode *> KR5ARC_robot::left_node;
 std::vector<volumenode *> KR5ARC_robot::right_node;
 
-KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr, 
+KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
+			   const int pos,
+			   const std::vector<double> para, 
 			   const Vector3D& p, const Vector3D& n, 
 			   const Vector3D& t, const std::vector<axis>& axes, 
 			   const std::vector<axis>& auxiliary_variable, const std::vector<int>& map,
 			   const std::vector<teach_point>& teach_points, const std::vector<double>& weight)
-	: system_state(axis_nr,auxiliary_variable_nr, p, n, t,
+	: system_state(axis_nr,auxiliary_variable_nr, pos, para, p, n, t,
 		       axes, auxiliary_variable, map, teach_points, weight)
 {
 	rob = new KR5ARC_RKA(); 
@@ -365,7 +369,7 @@ int KR5ARC_robot::cd()
 	KR5ARC_RKA kr5;
 	for (int i = 0; i < left_node.size(); i++) {
 		for (int j = 0; j < right_node.size(); j++) {					
-			TRANS left_trans = kr5.getTransWorldToWorkpiece(i, ex_angle);
+			TRANS left_trans = kr5.getTransWorldToWorkpiece(m_pos, i, ex_angle);
 //			log_trans("left_trans", left_trans);
 			TRANS right_trans = kr5.get_trans_to_world(j, angle, ex_angle);
 //			log_trans("right_trans", right_trans);

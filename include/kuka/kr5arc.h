@@ -54,7 +54,7 @@ public:
 	virtual illegal_joint IsLegal(const JAngle& JA);	
 	TRANS get_trans_to_base(int index, const JAngle& angle);
 	TRANS get_trans_to_world(int index, const JAngle& angle, const JAngle& ex_angle);
-	TRANS getTransWorldToWorkpiece(int index, const JAngle& ex_angle);
+	TRANS getTransWorldToWorkpiece(int id, int index, const JAngle& ex_angle);
 
 	TRANS RotateX(double angle);
 	TRANS RotateY(double angle);	
