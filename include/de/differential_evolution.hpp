@@ -202,6 +202,15 @@ public:
 
 			std::cerr << "genCount:" << genCount << ": " << std::endl;
 
+			// if (m_bestInd->cost() == 0) {
+			// 	std::cout << "genCount:" << genCount << ": " << std::endl;
+			// 	for (int i = 0; i < m_pop1->size(); i++) {
+			// 		std::cout << (*m_pop1)[i]->cost() << std::endl;
+			// 	}
+			// 	std::cout << m_pop1->to_string() << std::endl;
+			// }
+
+
 			BOOST_SCOPE_EXIT_TPL( (m_listener) )
 			{
 				m_listener->end();

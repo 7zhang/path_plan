@@ -189,8 +189,10 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 	double d = sqrt(t1.dx * t1.dx + t1.dy * t1.dy);
 	if (d < 1e-6) {
 		m_auxiliary_variable_values[5] = 90;
+		std::cout << "d < 1e-6" << std::endl;
 	} else {
 		Vector3D gb_16672_yaxis(t1.dy / d, - t1.dx / d, 0.0);
+		axis_y = part_trans * axis_y;
 		double tmp = gb_16672_yaxis ^ axis_y;
 		if (tmp < 0.0) {
 			gb_16672_yaxis = gb_16672_yaxis * (-1.0);
@@ -305,8 +307,8 @@ void KR5ARC_robot::cd_initialize()
 		return;
 	}
 	cd_parameter cd_para;
-	cd_para.max_length = 20;
-	cd_para.max_triangle = 17;
+	cd_para.max_length = 60;
+	cd_para.max_triangle = 5;
 
 	std::vector<std::string> left_path, right_path;
 	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_lbase.STL");

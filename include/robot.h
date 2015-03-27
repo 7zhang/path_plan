@@ -295,10 +295,6 @@ void robot_system<T>::operator()()
 
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
-		cerr << "job " << m_job_id << ": ";
-		cerr << "i = " << i << ", ";
-		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
-		     << m_job.get_p(i).dz << std::endl;
 		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.m_pos, m_job.m_para, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
 			    m_axes, m_auxiliary_variable, m_map, m_teach_points, m_teach_weight);
 		cur_state.cd_detect = cd_detect;
@@ -324,10 +320,26 @@ void robot_system<T>::operator()()
 		de.run();
 		de::individual_ptr best = de.best();
 
+		cerr << "job " << m_job_id << ": ";
+		cerr << "i = " << i << ", ";
+		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
+		     << m_job.get_p(i).dz << std::endl;
+
+		/* de::DVectorPtr args = best->vars(); */
+		/* for (int j = 0; j < m_redundancy; j++) { */
+		/* 	std::cerr << "range " << j << ": " << (*constraints)[j]->min() << " " << (*constraints)[j]->max() << std::endl; */
+		/* 	if ((*args)[j] < (*constraints)[j]->min() || (*args)[j] > (*constraints)[j]->max()) { */
+		/* 		std::cerr << "error: variable out of range" << std::endl; */
+		/* 		std::cerr << (*args)[j] << " " << (*constraints)[j]->min() << " " << (*constraints)[j]->max() << std::endl; */
+		/* 	} */
+		/* } */
+
 		std::cerr << best->cost() << endl;
 
 		double cost = cur_state(best->vars());
 		std::cerr << std::endl << cur_state.to_string() << std::endl;
+		
+
 		/* if (cur_state.cd()) { */
 		/* 	std::cerr << "triggered" << std::endl; */
 		/* 	cd_detect = 1; */
@@ -360,7 +372,7 @@ void robot_system<T>::operator()()
 		/* cd_detect = 0; */
 		double diff = cur_state.dist(pre_state);
 
-		if (i > 0 && diff > 200 && err_count < 10) {
+		if (i > 0 && (diff > 200 /* || cost == 0 */) && err_count < 10) {
 			err_count++;
 			std::cerr << "err_count = " << err_count << std::endl;
 			i--;
