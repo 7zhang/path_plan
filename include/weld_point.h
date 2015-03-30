@@ -14,7 +14,10 @@ public:
 	JAngle m_angle2;
 public:
 	weld_point(Vector3D p, Vector3D n, Vector3D t, double theta = 0, double fi = 0)
-		:m_p(p), m_n(n), m_t(t), m_theta(theta), m_fi(fi) {}
+		:m_p(p), m_n(n), m_t(t), m_theta(theta), m_fi(fi) {
+		m_n.unitize();
+		m_t.unitize();
+	}
 	~weld_point(){}
 
 	TRANS get_trans();

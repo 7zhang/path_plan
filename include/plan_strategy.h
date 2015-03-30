@@ -171,6 +171,7 @@ void plan_strategy<T>::operator() ()
 //	int index = 0;
 	double max_recommend = -1.0;
 	for (int i = 0; i < tries.size(); i++) {
+		std::cerr << "tries " << i << " recommend: " << tries[i]->recommend << std::endl;
 		if (tries[i]->recommend > max_recommend) {
 			max_recommend = tries[i]->recommend;
 			index = i;

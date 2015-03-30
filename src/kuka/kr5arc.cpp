@@ -205,7 +205,7 @@ bool KR5ARC_InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const T
 	return 0;
 }
 
-KR5ARC_RKA::KR5ARC_RKA()
+KR5ARC_RKA::KR5ARC_RKA() : dh1(0, 2151, 0), dh2(0, -505, 90)
 {
 	DHparameters DH1(0.0, 675.0, 0.0);
 	DHparameters DH2(260.0, 0.0, -90.0);
@@ -342,13 +342,12 @@ TRANS KR5ARC_RKA::get_trans_to_world(int index, const JAngle& angle, const JAngl
 // 	return ret;
 // }
 
+
 TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int id, int index, const JAngle& ex_angle)
 {
 	assert(index < 4);
 	double ext1;
 	double ext2;
-	DHparameters dh1(0, 2151, 0);
-	DHparameters dh2(0, -505, 90);
 
 	TRANS t[4];
 	ext1 = ex_angle.angle[0];

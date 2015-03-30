@@ -10,6 +10,8 @@
  *
  *
  */
+KR5ARC_RKA kr5;
+//int output = 0;
 
 void KR5ARC_robot::init(std::string& m_sys_name, 
 			int& m_redundancy,
@@ -48,7 +50,7 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
 	m_auxiliary_variable[5] = axis(-15.0 + para[1], 15.0 + para[1], 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
-	std::cout << "para:" << para[0] << " " << para[1] << std::endl;
+	std::cout << "para: " << para[0] << " " << para[1] << std::endl;
 	m_map.push_back(6);
 	m_map.push_back(7);
 	m_map.push_back(8);
@@ -176,7 +178,7 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 
 	JAngle ex_angle((*args)[0], (*args)[1], (*args)[2], (*args)[3], 0.0, 0.0);//modified
 	TRANS part_trans;
-	KR5ARC_RKA kr5;
+	
 	part_trans = kr5.getTransWorldToWorkpiece(m_pos, 3, ex_angle);
 
 //	print_trans("part_trans", part_trans);
@@ -188,7 +190,7 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 	m_auxiliary_variable_values[4] = 90 - angle_between(t1, up);
 	double d = sqrt(t1.dx * t1.dx + t1.dy * t1.dy);
 	if (d < 1e-6) {
-		m_auxiliary_variable_values[5] = 90;
+		m_auxiliary_variable_values[5] = (m_auxiliary_variable[5].min() + m_auxiliary_variable[5].max()) / 2;
 		std::cout << "d < 1e-6" << std::endl;
 	} else {
 		Vector3D gb_16672_yaxis(t1.dy / d, - t1.dx / d, 0.0);
@@ -234,7 +236,8 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 		printf("error inverserobot\n");
 #endif
 //		delete rob;
-		return std::numeric_limits<double>::quiet_NaN();
+		m_cri = std::numeric_limits<double>::quiet_NaN();
+		return m_cri;
 	}
 
 	// TRANS t01, t02, t03, t04, t05, t06;
@@ -272,7 +275,8 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 //	delete rob;
 
 	if (cd_detect && cd()) {
-		return std::numeric_limits<double>::quiet_NaN();
+		m_cri = std::numeric_limits<double>::quiet_NaN();
+		return m_cri;
 	}
 	
 	m_auxiliary_variable_values[3] = get_jacobi_deter(angle);
@@ -368,7 +372,7 @@ int KR5ARC_robot::cd()
 	JAngle angle(m_axes_values[0], m_axes_values[1], m_axes_values[2],
 				  m_axes_values[3], m_axes_values[4], m_axes_values[5]);
 	JAngle ex_angle(m_axes_values[6], m_axes_values[7], m_axes_values[8], m_axes_values[9], 0.0, 0.0);
-	KR5ARC_RKA kr5;
+//	KR5ARC_RKA kr5;
 	for (int i = 0; i < left_node.size(); i++) {
 		for (int j = 0; j < right_node.size(); j++) {					
 			TRANS left_trans = kr5.getTransWorldToWorkpiece(m_pos, i, ex_angle);

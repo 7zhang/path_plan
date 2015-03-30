@@ -89,10 +89,34 @@ system_state(int axis_nr,
 		// 	std::cout << "rlen = " << rlen << std::endl;
 		// 	std::cout << "dot = " << dot << std::endl;
 		// }
-		double pi = boost::math::constants::pi<double>();
-		assert(tmp <= 1.0 && tmp >= -1.0);
+
+		if (tmp > 1.0) {
+			return 0.0;
+		} else if (tmp < -1.0) {
+			return 180.0;
+		} else {
+			double pi = boost::math::constants::pi<double>();
+			return acos(tmp) / pi * 180.0;	
+		}
+		/* if (tmp > 1.0 || tmp < -1.0) { */
+		/* 	std::ostringstream os; */
+		/* 	os.precision(16); */
+		/* 	os << std::setw(10); */
+		/* 	os.width(10); */
+		/* 	os << "tmp: " << tmp << std::endl; */
+		/* 	os << "lhs: " << lhs.dx << " " << lhs.dy << " " << lhs.dz */
+		/* 	   << ", rhs: " << rhs.dx << " " << rhs.dy << " " << rhs.dz; */
+		/* 	std::cerr << os.str() << std::endl; */
+		/* 	double tmp1 = tmp; */
+		/* 	if (tmp > 1.0) { */
+		/* 		tmp = 1.0; */
+		/* 	} else if (tmp < -1.0) { */
+		/* 		tmp = -1.0; */
+		/* 	} */
+		/* 	std::cerr << "acos: " << acos(tmp) / pi * 180.0 << std::endl; */
+		/* 	assert(tmp1 <= 1.0 && tmp1 >= -1.0); */
+		/* } */
 //	return tmp;
-		return acos(tmp) / pi * 180.0;
 	}
 	virtual TRANS get_gun_in_seam(const JAngle& weld_angle) = 0;
 	virtual TRANS getTransWorldToWorkpiece(JAngle ex_angle) = 0;

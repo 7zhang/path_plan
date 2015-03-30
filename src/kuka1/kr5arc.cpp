@@ -205,7 +205,7 @@ bool KR5ARC_InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const T
 	return 0;
 }
 
-KR5ARC_RKA::KR5ARC_RKA()
+KR5ARC_RKA::KR5ARC_RKA() : dh1(0, 2151, 0), dh2(0, -505, 90)
 {
 	DHparameters DH1(0.0, 675.0, 0.0);
 	DHparameters DH2(260.0, 0.0, -90.0);
@@ -324,15 +324,46 @@ TRANS KR5ARC_RKA::get_trans_to_world(int index, const JAngle& angle, const JAngl
 	}
 }
 
-TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int index, const JAngle& ex_angle)
+// TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int index, const JAngle& ex_angle)
+// {
+// 	assert(index < 4);
+// 	double ext1 = ex_angle.angle[0];
+// 	double ext2 = ex_angle.angle[1];
+// 	TRANS t[4];
+// 	t[0] = Trans(2625.0, 1020.0, 1720.0)*RotateY(90)*RotateX(90);
+// 	t[1] = Trans(0, 0, 106)*RotateZ(-90)*RotateZ(ext1);
+// 	t[2] = Trans(0.0,505.0,2045.0)*RotateX(90)*RotateZ(ext2);
+
+// 	TRANS ret;
+// 	for (int i = 0; i <= index; i++) {
+// 		ret = ret * t[i];
+// 	}
+// 	//return TP2*RotateZ(90);
+// 	return ret;
+// }
+
+
+TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int id, int index, const JAngle& ex_angle)
 {
 	assert(index < 4);
-	double ext1 = ex_angle.angle[0];
-	double ext2 = ex_angle.angle[1];
+	double ext1;
+	double ext2;
+
 	TRANS t[4];
-	t[0] = Trans(2625.0, 1020.0, 1720.0)*RotateY(90)*RotateX(90);
-	t[1] = Trans(0, 0, 106)*RotateZ(-90)*RotateZ(ext1);
-	t[2] = Trans(0.0,505.0,2045.0)*RotateX(90)*RotateZ(ext2);
+	ext1 = ex_angle.angle[0];
+	ext2 = ex_angle.angle[1];
+	if (id == 1) {
+		t[0] = Trans(2625.0, 1020.0, 1720.0)*RotateZ(180)*RotateX(-90);
+	} else if (id == 0) {
+		t[0] = Trans(-2625.0, 1020.0, 1720.0)*RotateZ(180)*RotateX(-90);
+		// ext1 = ex_angle.angle[4];
+		// ext2 = ex_angle.angle[5];
+	}
+	
+//	t[1] = Trans(0, 0, 106)*RotateZ(-90)*RotateZ(ext1);
+//	t[2] = Trans(0.0,505.0,2045.0)*RotateX(90)*RotateZ(ext2);
+	t[1] = dh1.get_reftrans(ext1);
+	t[2] = dh2.get_reftrans(ext2);
 
 	TRANS ret;
 	for (int i = 0; i <= index; i++) {
@@ -341,6 +372,7 @@ TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int index, const JAngle& ex_angle)
 	//return TP2*RotateZ(90);
 	return ret;
 }
+
 /*
 	2014年12月23日 杨明亮
 */

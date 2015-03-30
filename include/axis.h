@@ -40,6 +40,8 @@ axis(double min, double max, double vel_max, double acc_max, double time_interva
 
 	double operator() (double value) const;
 	double mid() const { return (m_min + m_max) / 2.0; }
+	double max() const { return m_max; }
+	double min() const { return m_min; }
 	double length() const { return m_max - m_min; }
 	std::pair<double, double> get_range() const;
 	int add_value(double value);

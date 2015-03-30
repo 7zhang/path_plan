@@ -21,7 +21,7 @@ using namespace de;
 
 static int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path);
 static int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path);
-
+//extern int output;
 
 class robot_listener : public de::listener
 {
@@ -336,8 +336,11 @@ void robot_system<T>::operator()()
 
 		std::cerr << best->cost() << endl;
 
+//		output = 1;
 		double cost = cur_state(best->vars());
-		std::cerr << std::endl << cur_state.to_string() << std::endl;
+//		output = 0;
+		std::cerr << cost << std::endl;
+		std::cerr << cur_state.to_string() << std::endl;
 		
 
 		/* if (cur_state.cd()) { */
@@ -449,6 +452,9 @@ void robot_system<T>::operator()()
 	int len = m_states.size();
 	for (int i = 0; i < len; i++) {
 		if (m_states[i].cd() || recommend < 0.0) {
+			std::cerr << "collision detected: job " << m_job_id
+				  << ", i = " << i
+				  << ", " << m_states[i].to_string() << std::endl;
 			recommend = -1.0;
 			goto finish;
 		} else {
