@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <time.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <map>
@@ -293,6 +294,10 @@ void robot_system<T>::operator()()
 	std::vector<T> try_vector;
 	int try_times = 0;
 
+	double sum = 0.0;
+	int len = m_job.get_size();
+	recommend = 1.0;
+
 	for (int i = 0; i < m_job.get_size(); i++) {
 //	for (int i = 0; i < 1; i++) {
 		T cur_state(m_axis_nr,m_auxiliary_variable_nr, m_job.m_pos, m_job.m_para, m_job.get_p(i), m_job.get_n(i), m_job.get_t(i),
@@ -320,10 +325,10 @@ void robot_system<T>::operator()()
 		de.run();
 		de::individual_ptr best = de.best();
 
-		cerr << "job " << m_job_id << ": ";
-		cerr << "i = " << i << ", ";
-		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
-		     << m_job.get_p(i).dz << std::endl;
+//		cerr << "job " << m_job_id << ": ";
+//		cerr << "i = " << i << ", ";
+//		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
+//		     << m_job.get_p(i).dz << std::endl;
 
 		/* de::DVectorPtr args = best->vars(); */
 		/* for (int j = 0; j < m_redundancy; j++) { */
@@ -334,12 +339,12 @@ void robot_system<T>::operator()()
 		/* 	} */
 		/* } */
 
-		std::cerr << best->cost() << endl;
+//		std::cerr << best->cost() << endl;
 
 //		output = 1;
 		double cost = cur_state(best->vars());
 //		output = 0;
-		std::cerr << cost << std::endl;
+//		std::cerr << cost << std::endl;
 		std::cerr << cur_state.to_string() << std::endl;
 		
 
@@ -377,7 +382,10 @@ void robot_system<T>::operator()()
 
 		if (i > 0 && (diff > 200 /* || cost == 0 */) && err_count < 10) {
 			err_count++;
-			std::cerr << "err_count = " << err_count << std::endl;
+			std::cout << "err_count = " << err_count << std::endl;
+			std::cout << "diff = " << diff << std::endl;
+			std::cout << "pre_state:" << std::endl << pre_state.to_string() << std::endl;
+			std::cout << "cur_state:" << std::endl << cur_state.to_string() << std::endl;
 			i--;
 			continue;
 		}
@@ -421,6 +429,17 @@ void robot_system<T>::operator()()
 		m_states.push_back(cur_state);
 		pre_state = cur_state;
 
+		if (cur_state.cd()) {
+			std::cerr << "collision detected: job " << m_job_id
+				  << ", i = " << i
+				  << ", " << cur_state.to_string() << std::endl;
+			recommend = -1.0;
+			break;
+		} else {
+			sum += cur_state.m_cri;
+		}
+
+
 		if (push_value(cur_state)) {
 			std::cerr << "state illegal" << std::endl;
 			recommend = -1.0;
@@ -448,22 +467,23 @@ void robot_system<T>::operator()()
 	}
 
 	boost::unique_lock<boost::mutex> lock(m_mutex);
-	double sum = 0.0;
-	int len = m_states.size();
-	for (int i = 0; i < len; i++) {
-		if (m_states[i].cd() || recommend < 0.0) {
-			std::cerr << "collision detected: job " << m_job_id
-				  << ", i = " << i
-				  << ", " << m_states[i].to_string() << std::endl;
-			recommend = -1.0;
-			goto finish;
-		} else {
-			sum += m_states[i].m_cri;
-		}
-	}
 
-	recommend = sum / len;
-finish:	m_continue = 0;
+	/* for (int i = 0; i < len; i++) { */
+	/* 	if (m_states[i].cd() || recommend < 0.0) { */
+	/* 		std::cerr << "collision detected: job " << m_job_id */
+	/* 			  << ", i = " << i */
+	/* 			  << ", " << m_states[i].to_string() << std::endl; */
+	/* 		recommend = -1.0; */
+	/* 		goto finish; */
+	/* 	} else { */
+	/* 		sum += m_states[i].m_cri; */
+	/* 	} */
+	/* } */
+	if (recommend > 0)
+		recommend = sum / len;
+//	end = clock();
+//	printf("cd time: %lf\n", ((double)(end - start)) / CLOCKS_PER_SEC);
+	m_continue = 0;
 //	m_cond.notify_one();
 
 //	program_jpos(best_angle, best_ex_angle, "./program.glp");

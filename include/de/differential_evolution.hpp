@@ -200,7 +200,7 @@ public:
 
 			}
 
-			std::cerr << "genCount:" << genCount << ": " << std::endl;
+//			std::cerr << "genCount:" << genCount << ": " << std::endl;
 
 			// if (m_bestInd->cost() == 0) {
 			// 	std::cout << "genCount:" << genCount << ": " << std::endl;

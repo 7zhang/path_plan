@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cmath>
+#include <string>
 #include <jsonrpccpp/server/connectors/httpserver.h>
 #include <boost/thread.hpp>
 #include "plan_server.h"
@@ -11,6 +12,8 @@
 #include "plan_strategy.h"
 using namespace std;
 using namespace jsonrpc;
+
+string stl_load_path;
 
 template <typename T>
 void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &response)
@@ -272,10 +275,12 @@ void path_plan_server<T>::set_sys_parameter_double(const Json::Value &request, J
 
 int main(int argc, const char *argv[])
 {
-	if (argc < 2) {
-		printf("usage server 8383\n");
+	if (argc < 3) {
+		printf("usage server 8383 stl_path\n");
 		return -1;
 	}
+
+	stl_load_path = argv[2];
 	jsonrpc::HttpServer httpserver(atoi(argv[1]));
 	KR5ARC_robot::cd_initialize();
 	path_plan_server<KR5ARC_robot > s(httpserver);

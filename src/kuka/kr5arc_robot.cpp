@@ -3,6 +3,8 @@
 #include "det6x6.h"
 #include "cd.h"
 
+extern std::string stl_load_path;
+
 /*
  * ten axes
  * six auxiliary variable: rpy and jacobi determinant
@@ -45,7 +47,7 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable.resize(6);
 	m_auxiliary_variable[0] = axis(-30.0, 0.0, 3.0, 3.0, 10, 0, 1.0);  	//gun's work angle
 	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0); 	//gun's walking angle
-	m_auxiliary_variable[2] = axis(-180.0, 180.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
+	m_auxiliary_variable[2] = axis(-105.0, -75.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
 	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
 	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
 	m_auxiliary_variable[5] = axis(-15.0 + para[1], 15.0 + para[1], 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
@@ -240,6 +242,12 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 		return m_cri;
 	}
 
+	if (angle.angle[5] > pre_angle.angle[5] + 180) {
+		angle.angle[5] -= 360;
+	} else if (angle.angle[5] < pre_angle.angle[5] - 180) {
+		angle.angle[5] += 360;
+	}
+
 	// TRANS t01, t02, t03, t04, t05, t06;
 	// Transform::getTransBaseToJoints(angle, t01, t02, t03, t04, t05, t06);
 
@@ -315,23 +323,29 @@ void KR5ARC_robot::cd_initialize()
 	cd_para.max_triangle = 5;
 
 	std::vector<std::string> left_path, right_path;
-	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_lbase.STL");
-	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_larm.STL");
-	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_plate.STL");
-	left_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_workpiece.STL");
+	std::string stl_full_path = "/home/zhang7/path_plan/cd/" + stl_load_path + "/";
+	left_path.push_back(stl_full_path + "kr16_lbase.STL");
+	left_path.push_back(stl_full_path + "kr16_larm.STL");
+	left_path.push_back(stl_full_path + "kr16_plate.STL");
+	left_path.push_back(stl_full_path + "kr16_workpiece.STL");
+//	left_path.push_back(stl_full_path + "box.STL");
 
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_rotate.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_updown.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_1.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_2.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_3.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_4.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_5.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_6.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_7.STL");
-	right_path.push_back("/home/zhang7/path_plan/cd/robot_stl/kr16_gun.STL");
+	right_path.push_back(stl_full_path + "kr16_rotate.STL");
+	right_path.push_back(stl_full_path + "kr16_updown.STL");
+	right_path.push_back(stl_full_path + "kr16_1.STL");
+	right_path.push_back(stl_full_path + "kr16_2.STL");
+	right_path.push_back(stl_full_path + "kr16_3.STL");
+	right_path.push_back(stl_full_path + "kr16_4.STL");
+	right_path.push_back(stl_full_path + "kr16_5.STL");
+	right_path.push_back(stl_full_path + "kr16_6.STL");
+	right_path.push_back(stl_full_path + "kr16_7.STL");
+	right_path.push_back(stl_full_path + "kr16_gun.STL");
 
 	for (int i = 0; i < left_path.size(); i++) {
+		std::string tmp;
+		unsigned int found = left_path[i].find_last_of("/");
+		tmp = left_path[i].substr(found + 1);
+
 		volumenode *ret = cd_init(left_path[i].c_str(), &cd_para);
 		if (ret == NULL)
 		{
@@ -340,9 +354,14 @@ void KR5ARC_robot::cd_initialize()
 		}
 		
 		left_node.push_back(ret);
+		std::cout << "STL model " << tmp << " loaded" << std::endl;
 	}
 
 	for (int i = 0; i < right_path.size(); i++) {
+		std::string tmp;
+		unsigned int found = right_path[i].find_last_of("/");
+		tmp = right_path[i].substr(found + 1);
+
 		volumenode *ret = cd_init(right_path[i].c_str(), &cd_para);
 		if (ret == NULL)
 		{
@@ -351,6 +370,7 @@ void KR5ARC_robot::cd_initialize()
 		}
 		
 		right_node.push_back(ret);
+		std::cout << "STL model " << tmp << " loaded" << std::endl;
 	}
 
 	return;

@@ -95,6 +95,7 @@ void plan_strategy<T>::operator() ()
 	}
 	
 //	std::cout << "candidate size: " << candidate.size() << std::endl;
+//	std::cout << "zyx = " << zyx << std::endl;
 //	std::cout << "start_tries size: " << start_tries.size() << std::endl;
 	for (int i = zyx + 1; i < start_tries.size(); i++) {
 		int result = 1;
