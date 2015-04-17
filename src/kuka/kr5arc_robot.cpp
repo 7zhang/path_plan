@@ -48,7 +48,7 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[0] = axis(-30.0, 0.0, 3.0, 3.0, 10, 0, 1.0);  	//gun's work angle
 	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0); 	//gun's walking angle
 	m_auxiliary_variable[2] = axis(-105.0, -75.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
-	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
+	m_auxiliary_variable[3] = axis(0.0, 2.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
 	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
 	m_auxiliary_variable[5] = axis(-15.0 + para[1], 15.0 + para[1], 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
@@ -202,9 +202,9 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 			gb_16672_yaxis = gb_16672_yaxis * (-1.0);
 		}
 		if (n1.dz > 0.0) {
-			m_auxiliary_variable_values[5] = angle_between(n1, gb_16672_yaxis);
+			m_auxiliary_variable_values[5] = angle_between(n1, gb_16672_yaxis) - 90;
 		} else {
-			m_auxiliary_variable_values[5] = -1.0 * angle_between(n1, gb_16672_yaxis);
+			m_auxiliary_variable_values[5] = -1.0 * angle_between(n1, gb_16672_yaxis) - 90;
 		}
 	}
 				

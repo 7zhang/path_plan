@@ -154,7 +154,7 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[0] = axis(-30.0, 0.0, 3.0, 3.0, 10, 0, 1.0);  	//gun's work angle
 	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0); 	//gun's walking angle
 	m_auxiliary_variable[2] = axis(-105.0, -75.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
-	m_auxiliary_variable[3] = axis(0.0, 1.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
+	m_auxiliary_variable[3] = axis(0.0, 2.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
 	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
 	m_auxiliary_variable[5] = axis(-15.0 + para[1], 15.0 + para[1], 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
@@ -418,15 +418,19 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 //	print_trans("gun_in_part", gun_in_part);
 
 	double ex[2];
-	weld_point wp(m_p, m_n, m_t, -(*args)[0], (*args)[1] - 90);
+	weld_point wp(m_p, m_n, m_t, -(*args)[0], (*args)[1]);
 	
 	std::vector<JAngle> vecangle;
-	int res = position.InverseRobot(wp, vecangle);
-	if (res == 0) {
+	int res = position.InverseRobot1(wp, vecangle);
+	if (res >= 0) {
+		for (int i = 0; i < 2; i++) {
+			if (std::isnan(vecangle[i].angle[1])) {
+				vecangle[i].angle[1] = pre_ex_angle.get_angle(2);
+				std::cout << "nan" << std::endl;
+			}
+		}
+		
 		select(pre_ex_angle, vecangle, ex, m_pos);
-	} else if (res == 1) {
-		ex[0] = pre_ex_angle.get_angle(1);
-		ex[1] = pre_ex_angle.get_angle(2);
 	} else {
 //		std::cout << "pre_ex_angle" << pre_ex_angle.angle[0] << " " << pre_ex_angle.angle[1] << std::endl;
 		m_cri = std::numeric_limits<double>::quiet_NaN();		

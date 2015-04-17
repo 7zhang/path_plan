@@ -16,6 +16,7 @@ public:
 	~positioner(){}
 
 	int InverseRobot(weld_point& weldpoint, vector<JAngle>& vecJointangle);
+	int InverseRobot1(weld_point& weldpoint, vector<JAngle>& vecJointangle);
 
 	//bool InverseRobotEx(vector<JAngle>& vecJointangle, const TRANS& t6);
 
