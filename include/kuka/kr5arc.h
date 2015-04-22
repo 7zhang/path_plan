@@ -13,6 +13,7 @@
 #include "dh_parameter.h"
 #include <iostream>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 ///////////////////////////////////
@@ -47,6 +48,7 @@ class KR5ARC_RKA : public IKinematicAlg             //KR5ARC机器人算法类
 	std::vector<DHparameters> DH;
 	DHparameters dh1;
 	DHparameters dh2;
+	RPY base_rpy;
 public:
 	KR5ARC_RKA();
 	virtual ~KR5ARC_RKA()  {}

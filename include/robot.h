@@ -325,10 +325,16 @@ void robot_system<T>::operator()()
 		de.run();
 		de::individual_ptr best = de.best();
 
-//		cerr << "job " << m_job_id << ": ";
-//		cerr << "i = " << i << ", ";
-//		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
-//		     << m_job.get_p(i).dz << std::endl;
+		cerr << "job " << m_job_id << ": ";
+		cerr << "i = " << i << ", pos = " << m_job.m_pos << std::endl;;
+		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
+		     << m_job.get_p(i).dz << std::endl;
+
+		cerr << m_job.get_n(i).dx << ", " << m_job.get_n(i).dy << ", "
+		     << m_job.get_n(i).dz << std::endl;
+
+		cerr << m_job.get_t(i).dx << ", " << m_job.get_t(i).dy << ", "
+		     << m_job.get_t(i).dz << std::endl;
 
 		/* de::DVectorPtr args = best->vars(); */
 		/* for (int j = 0; j < m_redundancy; j++) { */

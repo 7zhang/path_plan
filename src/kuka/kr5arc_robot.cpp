@@ -308,9 +308,7 @@ KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	: system_state(axis_nr,auxiliary_variable_nr, pos, para, p, n, t,
 		       axes, auxiliary_variable, map, teach_points, weight)
 {
-	rob = new KR5ARC_RKA(); 
-
-
+//	rob = new KR5ARC_RKA();
 }
 
 void KR5ARC_robot::cd_initialize()
@@ -433,7 +431,7 @@ void KR5ARC_robot::print_trans(std::string name, TRANS& trans) {
 
 bool KR5ARC_robot::InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const TRANS& t6)
 {
-	return rob->InverseRobot(Jointangle, lastJointangle, t6);
+	return kr5.InverseRobot(Jointangle, lastJointangle, t6);
 }
 
 double KR5ARC_robot::get_jacobi_deter(JAngle& angle)

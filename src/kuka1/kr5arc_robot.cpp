@@ -175,15 +175,15 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_map.push_back(11);
 	m_map.push_back(12);				//modified
 
-	std::vector<double> mu_axis(10);		//modified
-	std::vector<double> sigma_axis(10);		//modified
-	std::vector<double> offset_axis(10, 0);		//modified
-	std::vector<double> weight_axis(10, 1.0);	//modified
+	// std::vector<double> mu_axis(10);		//modified
+	// std::vector<double> sigma_axis(10);		//modified
+	// std::vector<double> offset_axis(10, 0);		//modified
+	// std::vector<double> weight_axis(10, 1.0);	//modified
 	
-	for (int i = 0; i < m_axes.size(); i++) {
-		mu_axis[i] = m_axes[i].mid();
-		sigma_axis[i] = m_axes[i].length() / 6.0;
-	}
+	// for (int i = 0; i < m_axes.size(); i++) {
+	// 	mu_axis[i] = m_axes[i].mid();
+	// 	sigma_axis[i] = m_axes[i].length() / 6.0;
+	// }
         // mu_axis[0] = -0.397979;
         // sigma_axis[0] = 20;
 

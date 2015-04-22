@@ -11,6 +11,8 @@
 
 #include "geometric.h"
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 #define IN
 #define OUT
