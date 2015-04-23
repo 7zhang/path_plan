@@ -6,6 +6,7 @@
 #include "positioner.h"
 
 extern std::string stl_load_path;
+extern TRANS world_to_base;
 
 /*
  * ten axes
@@ -174,6 +175,8 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_map.push_back(10);
 	m_map.push_back(11);
 	m_map.push_back(12);				//modified
+
+	kr5.base_rpy.RPY2Trans(world_to_base);
 
 	// std::vector<double> mu_axis(10);		//modified
 	// std::vector<double> sigma_axis(10);		//modified
@@ -571,9 +574,7 @@ KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr,
 	: system_state(axis_nr,auxiliary_variable_nr, pos, para, p, n, t,
 		       axes, auxiliary_variable, map, teach_points, weight)
 {
-	rob = new KR5ARC_RKA(); 
-
-
+//	rob = new KR5ARC_RKA(); 
 }
 
 // KR5ARC_robot::KR5ARC_robot(int axis_nr, int auxiliary_variable_nr, 
@@ -685,7 +686,7 @@ int KR5ARC_robot::cd()
 	JAngle angle(m_axes_values[0], m_axes_values[1], m_axes_values[2],
 				  m_axes_values[3], m_axes_values[4], m_axes_values[5]);
 	JAngle ex_angle(m_axes_values[6], m_axes_values[7], m_axes_values[8], m_axes_values[9], 0.0, 0.0);
-	KR5ARC_RKA kr5;
+//	KR5ARC_RKA kr5;
 	for (int i = 0; i < left_node.size(); i++) {
 		for (int j = 0; j < right_node.size(); j++) {					
 			TRANS left_trans = kr5.getTransWorldToWorkpiece(m_pos, i, ex_angle);
@@ -726,7 +727,7 @@ void KR5ARC_robot::print_trans(std::string name, TRANS& trans) {
 
 bool KR5ARC_robot::InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const TRANS& t6)
 {
-	return rob->InverseRobot(Jointangle, lastJointangle, t6);
+	return kr5.InverseRobot(Jointangle, lastJointangle, t6);
 }
 
 double KR5ARC_robot::get_jacobi_deter(JAngle& angle)

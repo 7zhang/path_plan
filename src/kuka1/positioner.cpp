@@ -3,6 +3,8 @@
 #include <string>
 #include <limits>
 
+TRANS world_to_base;
+
 void print_trans(const std::string& trans_name, const TRANS& trans)
 {
 	std::cout << trans_name << std::endl;
@@ -29,10 +31,10 @@ positioner::positioner()
 bool positioner::PositiveRobot(weld_point& weldpoint, const JAngle& JA)
 {
 	//已知焊缝在世界坐标系中的位姿，求焊缝倾角和焊缝转角
-	TRANS world_to_base(-1.0, 0.0, 0.0,
-			    0.0, 0.0, -1.0,
-			    0.0, -1.0, 0.0,
-			    2625, 1020, 1720);
+	// TRANS world_to_base(-1.0, 0.0, 0.0,
+	// 		    0.0, 0.0, -1.0,
+	// 		    0.0, -1.0, 0.0,
+	// 		    2625, 1020, 1720);
 	//print_trans("world_to_base", world_to_base);
 
 	TRANS world_to_workpiece = world_to_base * DH[0].get_reftrans(JA.get_angle(1)) * DH[1].get_reftrans(JA.get_angle(2));
@@ -68,10 +70,10 @@ int positioner::InverseRobot1(weld_point& weldpoint, vector<JAngle>& vecJointang
 	double theta = weldpoint.m_theta * PI / 180.0;
 	double fi = weldpoint.m_fi * PI / 180.0;
 
-	TRANS world_to_base(-1.0, 0.0, 0.0,
-			    0.0, 0.0, -1.0,
-			    0.0, -1.0, 0.0,
-			    2625, 1020, 1720);
+	// TRANS world_to_base(-1.0, 0.0, 0.0,
+	// 		    0.0, 0.0, -1.0,
+	// 		    0.0, -1.0, 0.0,
+	// 		    2625, 1020, 1720);
 
 	double w_p0_nx = world_to_base.rot.mem[0][0];
 	double w_p0_ny = world_to_base.rot.mem[1][0];
@@ -138,7 +140,7 @@ int positioner::InverseRobot1(weld_point& weldpoint, vector<JAngle>& vecJointang
 
 	if (!isZero(w_p0_nz))
 	{
-		delta = atan(w_p0_oz / w_p0_nz);
+		delta = atan2(w_p0_oz, w_p0_nz);
 		double demonimator = w_p0_nz * sin_alph * w_p0_nz * sin_alph + w_p0_oz * sin_alph * w_p0_oz * sin_alph;
 		if (isZero(demonimator))
 		{
@@ -180,13 +182,13 @@ int positioner::InverseRobot1(weld_point& weldpoint, vector<JAngle>& vecJointang
 		sin_theta2 = (a11 * v - a21 * t) / (a11 * a22 - a21 * a12);
 		angle_temp1.angle[1] = atan2(sin_theta2, cos_theta2);
 		////////////////////////////////////////////////////////
-	next1:	if (gama >= 0)
+	next1:	if (delta - gama >= 0)
 		{
-			angle_temp2.angle[0] = PI - gama + delta;
+			angle_temp2.angle[0] = -PI - gama + delta;
 		} 
 		else
 		{
-			angle_temp2.angle[0] =- PI - gama + delta;
+			angle_temp2.angle[0] = PI - gama + delta;
 		}
 		
 		a11 = w_p0_nz * cos(angle_temp2.angle[0]) + w_p0_oz * sin(angle_temp2.angle[0]);

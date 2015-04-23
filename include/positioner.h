@@ -11,6 +11,7 @@ public:
 	std::vector<DHparameters> DH;
 	//vector<JAngle> m_jangle1;
 	//vector<JAngle> m_jangle2;
+
 public:
 	positioner();
 	~positioner(){}

@@ -45,11 +45,12 @@ using namespace std;
 
 class KR5ARC_RKA : public IKinematicAlg             //KR5ARC机器人算法类
 {
+public:
 	std::vector<DHparameters> DH;
 	DHparameters dh1;
 	DHparameters dh2;
 	RPY base_rpy;
-public:
+
 	KR5ARC_RKA();
 	virtual ~KR5ARC_RKA()  {}
 	virtual bool InverseRobot(JAngle& Jointangle,const JAngle& lastJointangle,const TRANS& t6);

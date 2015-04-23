@@ -219,6 +219,19 @@ KR5ARC_RKA::KR5ARC_RKA() : dh1(0, 2151, 0), dh2(0, -505, 90)
 	DH.push_back(DH4);
 	DH.push_back(DH5);
 	DH.push_back(DH6);
+
+	fstream f;
+	f.open("config.txt", ios::binary|ios::in);
+	if (!f.is_open()) {
+		cerr << "couldn't open file " << "config.txt" << endl;
+		return;
+	}
+	f >> base_rpy.pos.dx >> base_rpy.pos.dy >> base_rpy.pos.dz
+	  >> base_rpy.orient.dx >> base_rpy.orient.dy >> base_rpy.orient.dz;
+	
+	std::cerr << "base_rpy: " << base_rpy.pos.dx << ", "<< base_rpy.pos.dy
+		  << ", " << base_rpy.pos.dz << ", " << base_rpy.orient.dx
+		  << ", " << base_rpy.orient.dy << ", " << base_rpy.orient.dz << std::endl;
 }
 
 bool KR5ARC_RKA::PositiveRobot(const JAngle& JA, TRANS& t6)
@@ -342,6 +355,17 @@ TRANS KR5ARC_RKA::get_trans_to_world(int index, const JAngle& angle, const JAngl
 // 	return ret;
 // }
 
+void ptrans(std::string name, TRANS& trans) {
+	std::cout << std::endl << name << std::endl;
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			std::cout << trans.rot.mem[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	std::cout << trans.pos.dx << " " << trans.pos.dy << " " << trans.pos.dz << std::endl;
+}
 
 TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int id, int index, const JAngle& ex_angle)
 {
@@ -353,12 +377,22 @@ TRANS KR5ARC_RKA::getTransWorldToWorkpiece(int id, int index, const JAngle& ex_a
 	ext1 = ex_angle.angle[0];
 	ext2 = ex_angle.angle[1];
 	if (id == 1) {
-		t[0] = Trans(2625.0, 1020.0, 1720.0)*RotateZ(180)*RotateX(-90);
+		base_rpy.RPY2Trans(t[0]);
+//		t[0] = Trans(2625.0, 1020.0, 1720.0)*RotateZ(180)*RotateX(-90);
 	} else if (id == 0) {
-		t[0] = Trans(-2625.0, 1020.0, 1720.0)*RotateZ(180)*RotateX(-90);
+		RPY tmp = base_rpy;
+		tmp.pos.dx = - tmp.pos.dx;
+		tmp.RPY2Trans(t[0]);
+//		t[0] = Trans(-2625.0, 1020.0, 1720.0)*RotateZ(180)*RotateX(-90);
 		// ext1 = ex_angle.angle[4];
 		// ext2 = ex_angle.angle[5];
 	}
+
+	// TRANS tr;
+	// base_rpy.RPY2Trans(tr);
+	// tr.inverse();
+	// TRANS tmp = tr*t[0];
+	// ptrans("tr-1 * t[0]", tmp);
 	
 //	t[1] = Trans(0, 0, 106)*RotateZ(-90)*RotateZ(ext1);
 //	t[2] = Trans(0.0,505.0,2045.0)*RotateX(90)*RotateZ(ext2);
