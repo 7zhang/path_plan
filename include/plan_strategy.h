@@ -72,7 +72,7 @@ void plan_strategy<T>::operator() ()
 	for (int i = 0; i < try_times; i++) {
 		boost::thread_group m_threads;
 		for (int i = 0; i < 4; i++) {
-			robot_system<T> *work = new robot_system<T>(i, 60, 0.001, stl_path, start_point);
+			robot_system<T> *work = new robot_system<T>(i, 70, 0.001, stl_path, start_point);
 			start_tries.push_back(work);
 			boost::thread* th( new boost::thread(boost::ref(*work)) );
 			m_threads.add_thread( th );
@@ -155,7 +155,7 @@ void plan_strategy<T>::operator() ()
 	for (int i = 0; i < candidate.size(); i++) {
 //	for (int i = 0; i < 1; i++) {
 		try {
-			robot_system<T> *work = new robot_system<T>(i, 60, 0.001, stl_path, sample);
+			robot_system<T> *work = new robot_system<T>(i, 70, 0.001, stl_path, sample);
 			work->push_value(candidate[i]->m_states[0]);
 			tries.push_back(work);
 			boost::thread* th( new boost::thread(boost::ref(*work)) );
@@ -186,7 +186,7 @@ void plan_strategy<T>::operator() ()
 	}
 // now finish the whole plan with start point at tries[index]
 	boost::thread_group ths2;
-	result = new robot_system<T>(0, 60, 0.001, stl_path, job(m_pos, m_para, m_p, m_n, m_t));
+	result = new robot_system<T>(0, 70, 0.001, stl_path, job(m_pos, m_para, m_p, m_n, m_t));
 	result->push_value(tries[index]->m_states[0]);
 //	tries.push_back(work);
 

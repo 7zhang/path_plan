@@ -14,6 +14,7 @@ using namespace std;
 using namespace jsonrpc;
 
 string stl_load_path;
+double max_cond = -1;
 
 template <typename T>
 void path_plan_server<T>::start_new(const Json::Value &request, Json::Value &response)

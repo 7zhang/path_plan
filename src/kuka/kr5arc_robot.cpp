@@ -2,8 +2,10 @@
 #include "teach_point.h"
 #include "det6x6.h"
 #include "cd.h"
+#include "condition_number.h"
 
 extern std::string stl_load_path;
+extern double max_cond;
 
 /*
  * ten axes
@@ -288,6 +290,10 @@ double KR5ARC_robot::operator() (de::DVectorPtr args) {
 	}
 	
 	m_auxiliary_variable_values[3] = get_jacobi_deter(angle);
+	if (m_auxiliary_variable_values[3] > max_cond) {
+		max_cond = m_auxiliary_variable_values[3];
+	}
+//	printf("%lf\n", m_auxiliary_variable_values[3]);
 //calc_criteria(&angle)  / 376234706.2853961;
 
 //	check();
@@ -439,15 +445,25 @@ double KR5ARC_robot::get_jacobi_deter(JAngle& angle)
 	double j[6][6];
 	jacobi(j, angle.get_angle(1), angle.get_angle(2), angle.get_angle(3), 
 	       angle.get_angle(4), angle.get_angle(5), angle.get_angle(6));
-		
+
+	// printf("jacobi: \n");
+	// for (int i = 0; i < 6; i++) {
+	// 	for (int jj = 0; jj < 6; jj++) {
+	// 		printf(" %lf", j[i][jj]);
+	// 	}
+	// 	printf("\n");
+	// }
+
+//0.238426
+	return condition_number(&j[0][0]);
 	return fabs(determinant(j)) / 587233000;
 }
 
-const double d1 = 675;
-const double a1 = 260;
-const double a2 = 680;
-const double a3 = 35;
-const double d4 = -670.0;
+const double d1 = 675 / 1000.0;
+const double a1 = 260 / 1000.0;
+const double a2 = 680 / 1000.0;
+const double a3 = 35 / 1000.0;
+const double d4 = -670.0 / 1000.0;
 const double RADIANPERDEGREE = 3.1415926535897932 / 180;
 
 void KR5ARC_robot::jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6)

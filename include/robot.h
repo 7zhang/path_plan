@@ -19,6 +19,7 @@
 #include "system_state.h"
 
 using namespace de;
+extern double max_cond;
 
 static int program_jpos(vector<JAngle> &angle, vector<JAngle> &ex_angle, const char *path);
 static int program_cpos(vector<RPY> &rpy, vector<JAngle> &ex_angle, const char *path);
@@ -325,16 +326,16 @@ void robot_system<T>::operator()()
 		de.run();
 		de::individual_ptr best = de.best();
 
-		cerr << "job " << m_job_id << ": ";
-		cerr << "i = " << i << ", pos = " << m_job.m_pos << std::endl;;
-		cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", "
-		     << m_job.get_p(i).dz << std::endl;
+		/* cerr << "job " << m_job_id << ": "; */
+		/* cerr << "i = " << i << ", pos = " << m_job.m_pos << std::endl;; */
+		/* cerr << m_job.get_p(i).dx << ", " << m_job.get_p(i).dy << ", " */
+		/*      << m_job.get_p(i).dz << std::endl; */
 
-		cerr << m_job.get_n(i).dx << ", " << m_job.get_n(i).dy << ", "
-		     << m_job.get_n(i).dz << std::endl;
+		/* cerr << m_job.get_n(i).dx << ", " << m_job.get_n(i).dy << ", " */
+		/*      << m_job.get_n(i).dz << std::endl; */
 
-		cerr << m_job.get_t(i).dx << ", " << m_job.get_t(i).dy << ", "
-		     << m_job.get_t(i).dz << std::endl;
+		/* cerr << m_job.get_t(i).dx << ", " << m_job.get_t(i).dy << ", " */
+		/*      << m_job.get_t(i).dz << std::endl; */
 
 		/* de::DVectorPtr args = best->vars(); */
 		/* for (int j = 0; j < m_redundancy; j++) { */
@@ -472,6 +473,7 @@ void robot_system<T>::operator()()
 		}
 	}
 
+	std::cout << "max_cond = " << max_cond << std::endl;
 	boost::unique_lock<boost::mutex> lock(m_mutex);
 
 	/* for (int i = 0; i < len; i++) { */
