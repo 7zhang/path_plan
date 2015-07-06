@@ -4,6 +4,7 @@
 #include "cd.h"
 #include "weld_point.h"
 #include "positioner.h"
+#include "condition_number.h"
 
 extern std::string stl_load_path;
 extern TRANS world_to_base;
@@ -137,29 +138,45 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_axis_nr = 10;				//modified
 	m_axes.resize(10);			//modified
 	//robot's joint  angles
-	m_axes[0] = axis(-155.0, 155.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[1] = axis(-180.0, 65.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[2] = axis(-15.0, 158.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[3] = axis(-350.0, 350.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[4] = axis(-130.0, 130.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[5] = axis(-350.0, 350.0, 50.0, 10.0, 10, 0, 1.0);
+	m_axes[0] = axis(-155.0, 155.0, 50.0, 10.0, 10, 0, 0.2);
+	m_axes[1] = axis(-180.0, 65.0, 50.0, 10.0, 10, 0, 0.2);
+	m_axes[2] = axis(-15.0, 158.0, 50.0, 10.0, 10, 0, 0.2);
+	m_axes[3] = axis(-350.0, 350.0, 50.0, 10.0, 10, 0, 0.2);
+	m_axes[4] = axis(-130.0, 130.0, 50.0, 10.0, 10, 0, 0.2);
+	m_axes[5] = axis(-350.0, 350.0, 50.0, 10.0, 10, 0, 0.2);
 	//positioner's joint angles
-	m_axes[6] = axis(-185.0, 185.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[7] = axis(-720.0, 720.0, 50.0, 10.0, 10, 0, 1);
+	m_axes[6] = axis(-185.0, 185.0, 50.0, 10.0, 10, 0, 0.2);
+	m_axes[7] = axis(-720.0, 720.0, 50.0, 10.0, 10, 0, 0.2);
 	//C-style brace's joint angles
-	m_axes[8] = axis(-180.0, 180.0, 50.0, 10.0, 10, 0, 1.0);
-	m_axes[9] = axis(-750.0, 750.0, 50.0, 10.0, 10, 0, 1.0);		//modified
+	m_axes[8] = axis(-180.0, 180.0, 50.0, 10.0, 10, 0, 0.2);
+//	m_axes[8] = axis(-35.0, -25.0, 50.0, 10.0, 10, 0, 0.2);
+	m_axes[9] = axis(-750.0, 750.0, 50.0, 10.0, 10, 0, 0.2);		//modified
+//	m_axes[9] = axis(495.0, 505.0, 50.0, 10.0, 10, 0, 1.0);		//modified
 
 	m_auxiliary_variable_nr = 6;
 	m_auxiliary_variable.resize(6);
-	m_auxiliary_variable[0] = axis(-30.0, 0.0, 3.0, 3.0, 10, 0, 1.0);  	//gun's work angle
-	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 1.0); 	//gun's walking angle
-	m_auxiliary_variable[2] = axis(-105.0, -75.0, 3.0, 3.0, 10, 0, 1.0);	//gun's rotation angle
-	m_auxiliary_variable[3] = axis(0.0, 2.0, 3.0, 3.0, 10, 3, 1.0);		//Jacobi matrix determinant
-	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
+	m_auxiliary_variable[0] = axis(-30.0, 0.0, 3.0, 3.0, 10, 0, 3.0);  	//gun's work angle
+	m_auxiliary_variable[1] = axis(-15.0, 15.0, 3.0, 3.0, 10, 0, 3.0); 	//gun's walking angle
+	m_auxiliary_variable[2] = axis(-105.0, -75.0, 3.0, 3.0, 10, 0, 3.0);	//gun's rotation angle
+	m_auxiliary_variable[3] = axis(0.0, 2.0, 3.0, 3.0, 10, 3, 3.0);		//Jacobi matrix determinant
+	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 3.0);	//weld slope angle
 	m_auxiliary_variable[5] = axis(-15.0 + para[1], 15.0 + para[1], 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
-	std::cout << "para: " << para[0] << " " << para[1] << std::endl;
+//	std::cout << "para: " << para[0] << " " << para[1] << std::endl;
+
+	std::cout << "para: ";
+	for (int i = 0; i < para.size(); i++) {
+		std::cout << para[i] << " ";
+	}
+	std::cout << std::endl;
+	kr5.base_rpy.orient.dx = para[2];
+	kr5.base_rpy.orient.dy = para[3];
+	kr5.base_rpy.orient.dz = para[4];
+
+	kr5.base_rpy.pos.dx = para[5];
+	kr5.base_rpy.pos.dy = para[6];
+	kr5.base_rpy.pos.dz = para[7];
+
 	// m_map.push_back(6);
 	// m_map.push_back(7);
 	// m_map.push_back(8);
@@ -683,13 +700,14 @@ error:
 
 int KR5ARC_robot::cd()
 {
+//	return 0;
 	JAngle angle(m_axes_values[0], m_axes_values[1], m_axes_values[2],
 				  m_axes_values[3], m_axes_values[4], m_axes_values[5]);
 	JAngle ex_angle(m_axes_values[6], m_axes_values[7], m_axes_values[8], m_axes_values[9], 0.0, 0.0);
 //	KR5ARC_RKA kr5;
 	for (int i = 0; i < left_node.size(); i++) {
+		TRANS left_trans = kr5.getTransWorldToWorkpiece(m_pos, i, ex_angle);
 		for (int j = 0; j < right_node.size(); j++) {					
-			TRANS left_trans = kr5.getTransWorldToWorkpiece(m_pos, i, ex_angle);
 //			log_trans("left_trans", left_trans);
 			TRANS right_trans = kr5.get_trans_to_world(j, angle, ex_angle);
 //			log_trans("right_trans", right_trans);
@@ -704,6 +722,30 @@ int KR5ARC_robot::cd()
 			v2.z = right_trans.pos.dz;
 
 			int result = collision_detection2(left_node[i], left_trans.rot.mem, 
+							  &v1, right_node[j], right_trans.rot.mem, &v2);
+			if (result) {
+				return result;
+			}
+		}
+	}
+
+	for (int i = 0; i < 2; i++) {
+		TRANS left_trans = kr5.get_trans_to_world(i, angle, ex_angle);
+		for (int j = 5; j < right_node.size(); j++) {
+//			log_trans("left_trans", left_trans);
+			TRANS right_trans = kr5.get_trans_to_world(j, angle, ex_angle);
+//			log_trans("right_trans", right_trans);
+
+			vector3d v1, v2;
+			v1.x = left_trans.pos.dx;
+			v1.y = left_trans.pos.dy;
+			v1.z = left_trans.pos.dz;
+
+			v2.x = right_trans.pos.dx;
+			v2.y = right_trans.pos.dy;
+			v2.z = right_trans.pos.dz;
+
+			int result = collision_detection2(right_node[i], left_trans.rot.mem, 
 							  &v1, right_node[j], right_trans.rot.mem, &v2);
 			if (result) {
 				return result;
@@ -736,14 +778,15 @@ double KR5ARC_robot::get_jacobi_deter(JAngle& angle)
 	jacobi(j, angle.get_angle(1), angle.get_angle(2), angle.get_angle(3), 
 	       angle.get_angle(4), angle.get_angle(5), angle.get_angle(6));
 		
+	return condition_number(&j[0][0]);
 	return fabs(determinant(j)) / 587233000;
 }
 
-const double d1 = 675;
-const double a1 = 260;
-const double a2 = 680;
-const double a3 = 35;
-const double d4 = -670.0;
+const double d1 = 675 / 1000.0;
+const double a1 = 260 / 1000.0;
+const double a2 = 680 / 1000.0;
+const double a3 = 35 / 1000.0;
+const double d4 = -670.0 / 1000.0;
 const double RADIANPERDEGREE = 3.1415926535897932 / 180;
 
 void KR5ARC_robot::jacobi(double j[6][6], double theta1, double theta2, double theta3, double theta4, double theta5, double theta6)

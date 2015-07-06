@@ -54,7 +54,19 @@ void KR5ARC_robot::init(std::string& m_sys_name,
 	m_auxiliary_variable[4] = axis(-15.0 + para[0], 15.0 + para[0], 3.0, 3.0, 10, 0, 1.0);	//weld slope angle
 	m_auxiliary_variable[5] = axis(-15.0 + para[1], 15.0 + para[1], 3.0, 3.0, 10, 0, 3.0);	//weld rotation angle
 
-	std::cout << "para: " << para[0] << " " << para[1] << std::endl;
+	std::cout << "para: ";
+	for (int i = 0; i < para.size(); i++) {
+		std::cout << para[i] << " ";
+	}
+	std::cout << std::endl;
+	kr5.base_rpy.orient.dx = para[2];
+	kr5.base_rpy.orient.dy = para[3];
+	kr5.base_rpy.orient.dz = para[4];
+
+	kr5.base_rpy.pos.dx = para[5];
+	kr5.base_rpy.pos.dy = para[6];
+	kr5.base_rpy.pos.dz = para[7];
+
 	m_map.push_back(6);
 	m_map.push_back(7);
 	m_map.push_back(8);
@@ -414,6 +426,30 @@ int KR5ARC_robot::cd()
 			v2.z = right_trans.pos.dz;
 
 			int result = collision_detection2(left_node[i], left_trans.rot.mem, 
+							  &v1, right_node[j], right_trans.rot.mem, &v2);
+			if (result) {
+				return result;
+			}
+		}
+	}
+
+	for (int i = 0; i < 2; i++) {
+		TRANS left_trans = kr5.get_trans_to_world(i, angle, ex_angle);
+		for (int j = 5; j < right_node.size(); j++) {
+//			log_trans("left_trans", left_trans);
+			TRANS right_trans = kr5.get_trans_to_world(j, angle, ex_angle);
+//			log_trans("right_trans", right_trans);
+
+			vector3d v1, v2;
+			v1.x = left_trans.pos.dx;
+			v1.y = left_trans.pos.dy;
+			v1.z = left_trans.pos.dz;
+
+			v2.x = right_trans.pos.dx;
+			v2.y = right_trans.pos.dy;
+			v2.z = right_trans.pos.dz;
+
+			int result = collision_detection2(right_node[i], left_trans.rot.mem, 
 							  &v1, right_node[j], right_trans.rot.mem, &v2);
 			if (result) {
 				return result;

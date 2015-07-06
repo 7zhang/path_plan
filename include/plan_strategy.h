@@ -138,10 +138,10 @@ void plan_strategy<T>::operator() ()
 	} else if (m_size < 100){
 		inc = 3;
 	} else {
-		inc = 10;
+		inc = 5;
 	}
 
-	for (int i = 0; i < m_size; i += 10) {
+	for (int i = 0; i < m_size; i += inc) {
 		tmpp.push_back(m_p[i]);
 		tmpn.push_back(m_n[i]);
 		tmpt.push_back(m_t[i]);
